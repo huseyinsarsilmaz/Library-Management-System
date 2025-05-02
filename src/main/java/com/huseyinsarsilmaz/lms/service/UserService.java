@@ -1,5 +1,7 @@
 package com.huseyinsarsilmaz.lms.service;
 
+import java.util.Optional;
+
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -35,6 +37,15 @@ public class UserService {
                 .build();
 
         return userRepository.save(newUser);
+    }
+
+    public User getByEmail(String email) {
+        Optional<User> optUser = userRepository.findByEmail(email);
+        if (optUser.isEmpty()) {
+            throw new RuntimeException("There is no user with this Email");
+        }
+
+        return optUser.get();
     }
 
 }
