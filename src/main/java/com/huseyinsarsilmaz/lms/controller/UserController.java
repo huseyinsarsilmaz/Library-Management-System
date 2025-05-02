@@ -24,6 +24,7 @@ public class UserController {
 
     @PostMapping("/register")
     public ResponseEntity<ApiResponse> register(@Valid @RequestBody RegisterRequest req) {
+        userService.isEmailTaken(req.getEmail());
 
         User newUser = userService.register(req);
         ApiResponse response = new ApiResponse(true, "User successfully registered", new RegisterResponse(newUser));

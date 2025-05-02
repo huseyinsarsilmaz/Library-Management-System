@@ -15,6 +15,12 @@ import lombok.RequiredArgsConstructor;
 public class UserService {
     private final UserRepository userRepository;
 
+    public void isEmailTaken(String email) {
+        if (userRepository.findByEmail(email).isPresent()) {
+            throw new RuntimeException("An User with this email already exists");
+        }
+    }
+
     public User register(RegisterRequest req) {
         // TODO Tightly coupled will be handled
         PasswordEncoder encoder = new BCryptPasswordEncoder();
