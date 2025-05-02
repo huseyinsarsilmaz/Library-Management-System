@@ -1,5 +1,7 @@
 package com.huseyinsarsilmaz.lms.service;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -25,6 +27,8 @@ public class UserService {
 
     public User register(RegisterRequest req) {
         req.setPassword(passwordEncoder.encode(req.getPassword()));
+        List<String> roles = new ArrayList<>();
+        roles.add(User.Role.LIBRARIAN.name());
 
         User newUser = User.builder()
                 .email(req.getEmail())
@@ -32,6 +36,7 @@ public class UserService {
                 .name(req.getName())
                 .surname(req.getSurname())
                 .phoneNumber(req.getPhoneNumber())
+                .roles(roles.toString())
                 .build();
 
         return userRepository.save(newUser);

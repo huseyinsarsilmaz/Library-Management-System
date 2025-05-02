@@ -24,7 +24,7 @@ public class User extends LmsEntity {
     private String surname;
     private String phoneNumber;
 
-    public enum UserRole {
+    public enum Role {
         PATRON,
         LIBRARIAN,
     }
