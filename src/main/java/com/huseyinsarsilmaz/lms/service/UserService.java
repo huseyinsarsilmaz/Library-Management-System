@@ -16,6 +16,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class UserService {
     private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
 
     public void isEmailTaken(String email) {
         if (userRepository.findByEmail(email).isPresent()) {
@@ -24,9 +25,7 @@ public class UserService {
     }
 
     public User register(RegisterRequest req) {
-        // TODO Tightly coupled will be handled
-        PasswordEncoder encoder = new BCryptPasswordEncoder();
-        req.setPassword(encoder.encode(req.getPassword()));
+        req.setPassword(passwordEncoder.encode(req.getPassword()));
 
         User newUser = User.builder()
                 .email(req.getEmail())
