@@ -35,3 +35,6 @@ build/
 ### Maven ###
 mvnw*
 .mvn/
+
+#Sensitive data
+application-local.properties
