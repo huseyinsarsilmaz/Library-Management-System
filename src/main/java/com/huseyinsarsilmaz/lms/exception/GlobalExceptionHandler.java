@@ -18,6 +18,11 @@ import com.huseyinsarsilmaz.lms.service.Utils;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
+    @ExceptionHandler(LmsException.class)
+    public ResponseEntity<ApiResponse> handleLmsException(LmsException ex) {
+        return Utils.failResponse(ex.getType(), ex.getArgs(), ex.getMessage(), ex.getHttpStatus());
+    }
+
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<ApiResponse> handleHttpMessageNotReadableException(HttpMessageNotReadableException ex) {
         return Utils.failResponse("invalid", new String[] { "Request" }, ex.getMessage(), HttpStatus.BAD_REQUEST);
