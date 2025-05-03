@@ -7,6 +7,8 @@ import java.util.Optional;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import com.huseyinsarsilmaz.lms.exception.AlreadyExistsException;
+import com.huseyinsarsilmaz.lms.exception.NotFoundException;
 import com.huseyinsarsilmaz.lms.model.dto.request.RegisterRequest;
 import com.huseyinsarsilmaz.lms.model.entity.User;
 import com.huseyinsarsilmaz.lms.repository.UserRepository;
@@ -21,7 +23,7 @@ public class UserService {
 
     public void isEmailTaken(String email) {
         if (userRepository.findByEmail(email).isPresent()) {
-            throw new RuntimeException("An User with this email already exists");
+            throw new AlreadyExistsException(User.class.getSimpleName(), "email");
         }
     }
 
@@ -45,7 +47,7 @@ public class UserService {
     public User getByEmail(String email) {
         Optional<User> optUser = userRepository.findByEmail(email);
         if (optUser.isEmpty()) {
-            throw new RuntimeException("There is no user with this Email");
+            throw new NotFoundException(User.class.getSimpleName(), "email");
         }
 
         return optUser.get();
