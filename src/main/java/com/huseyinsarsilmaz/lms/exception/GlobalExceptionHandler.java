@@ -7,6 +7,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.InternalAuthenticationServiceException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -44,6 +45,18 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ApiResponse> handleBadCredentialsException(BadCredentialsException ex) {
         return Utils.failResponse("failed", new String[] { "User login" }, ex.getMessage(), HttpStatus.UNAUTHORIZED);
 
+    }
+
+    @ExceptionHandler(InternalAuthenticationServiceException.class)
+    public ResponseEntity<ApiResponse> handleInternalAuthenticationServiceException(
+            InternalAuthenticationServiceException ex) {
+        if (ex.getCause() instanceof NotFoundException) {
+            // This case only occurs when the user enters a non-existent email in login
+            return Utils.failResponse("not.found", new String[] { "User", "email" }, ex.getMessage(),
+                    HttpStatus.NOT_FOUND);
+
+        }
+        return Utils.failResponse("general", new String[] {}, ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
     @ExceptionHandler(Exception.class)
