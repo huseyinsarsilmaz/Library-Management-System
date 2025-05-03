@@ -17,6 +17,7 @@ import com.huseyinsarsilmaz.lms.model.dto.response.RegisterResponse;
 import com.huseyinsarsilmaz.lms.model.entity.User;
 import com.huseyinsarsilmaz.lms.security.JwtService;
 import com.huseyinsarsilmaz.lms.service.UserService;
+import com.huseyinsarsilmaz.lms.service.Utils;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -41,17 +42,15 @@ public class AuthController {
         userService.isEmailTaken(req.getEmail());
 
         User newUser = userService.register(req);
-        ApiResponse response = new ApiResponse(true, "User successfully registered", new RegisterResponse(newUser));
-        return new ResponseEntity<>(response, HttpStatus.CREATED);
-
+        return Utils.successResponse("Registration request", "sent", new RegisterResponse(newUser), HttpStatus.CREATED);
     }
 
     @PostMapping("/login")
     public ResponseEntity<ApiResponse> login(@Valid @RequestBody LoginRequest req) {
         String token = getJwtToken(req);
 
-        ApiResponse response = new ApiResponse(true, "User successfully logged in", new LoginResponse(token));
-        return new ResponseEntity<>(response, HttpStatus.OK);
+        return Utils.successResponse("User", "logged in", new LoginResponse(token), HttpStatus.OK);
+
     }
 
 }
