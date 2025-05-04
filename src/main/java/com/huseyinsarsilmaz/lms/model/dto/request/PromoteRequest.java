@@ -4,6 +4,7 @@ import com.huseyinsarsilmaz.lms.model.entity.User;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -15,6 +16,6 @@ public class PromoteRequest {
     @Email(message = "Invalid email format")
     private String email;
 
-    @NotBlank(message = "New Role is required")
+    @NotNull(message = "New Role is required")
     private User.Role newRole;
 }
