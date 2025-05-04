@@ -42,14 +42,15 @@ public class AuthController {
         userService.isEmailTaken(req.getEmail());
 
         User newUser = userService.register(req);
-        return Utils.successResponse("Registration request", "sent", new RegisterResponse(newUser), HttpStatus.CREATED);
+        return Utils.successResponse(User.class.getSimpleName(), "registered", new RegisterResponse(newUser),
+                HttpStatus.CREATED);
     }
 
     @PostMapping("/login")
     public ResponseEntity<ApiResponse> login(@Valid @RequestBody LoginRequest req) {
         String token = getJwtToken(req);
 
-        return Utils.successResponse("User", "logged in", new LoginResponse(token), HttpStatus.OK);
+        return Utils.successResponse(User.class.getSimpleName(), "logged in", new LoginResponse(token), HttpStatus.OK);
 
     }
 
