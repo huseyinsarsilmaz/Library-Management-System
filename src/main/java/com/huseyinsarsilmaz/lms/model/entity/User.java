@@ -25,9 +25,9 @@ public class User extends LmsEntity {
     private String phoneNumber;
 
     public enum Role {
-        PATRON,
-        LIBRARIAN,
-        ADMIN
+        ROLE_PATRON,
+        ROLE_LIBRARIAN,
+        ROLE_ADMIN
     }
 
 }
