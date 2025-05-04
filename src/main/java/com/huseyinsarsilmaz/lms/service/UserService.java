@@ -19,4 +19,6 @@ public interface UserService {
     public void checkRole(User user, User.Role requiredRole);
 
     public User update(User user, UserUpdateRequest req);
+
+    public void deleteUser(User user);
 }
