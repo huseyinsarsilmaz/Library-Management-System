@@ -1,6 +1,7 @@
 package com.huseyinsarsilmaz.lms.model.dto.request;
 
 import com.huseyinsarsilmaz.lms.validation.Alphabethical;
+import com.huseyinsarsilmaz.lms.validation.PhoneNumber;
 import com.huseyinsarsilmaz.lms.validation.RequiredField;
 import com.huseyinsarsilmaz.lms.validation.StrSize;
 
@@ -25,4 +26,8 @@ public class UserUpdateRequest {
     @StrSize(entityName = "User", fieldName = "surname", min = 2, max = 32)
     @Alphabethical(entityName = "User", fieldName = "surname")
     private String surname;
+
+    @RequiredField(entityName = "User", fieldName = "phone number")
+    @PhoneNumber(entityName = "User", fieldName = "phone number")
+    private String phoneNumber;
 }
