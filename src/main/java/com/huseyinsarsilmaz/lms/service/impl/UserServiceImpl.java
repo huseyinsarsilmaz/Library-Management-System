@@ -14,6 +14,7 @@ import com.huseyinsarsilmaz.lms.exception.NotFoundException;
 import com.huseyinsarsilmaz.lms.model.dto.request.RegisterRequest;
 import com.huseyinsarsilmaz.lms.model.entity.User;
 import com.huseyinsarsilmaz.lms.repository.UserRepository;
+import com.huseyinsarsilmaz.lms.security.JwtService;
 import com.huseyinsarsilmaz.lms.service.UserService;
 
 import lombok.RequiredArgsConstructor;
@@ -23,6 +24,7 @@ import lombok.RequiredArgsConstructor;
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final JwtService jwtService;
 
     public void isEmailTaken(String email) {
         if (userRepository.findByEmail(email).isPresent()) {
@@ -70,6 +72,12 @@ public class UserServiceImpl implements UserService {
 
         user.setRoles(String.join(",", newRoles));
         return userRepository.save(user);
+    }
+
+    public User getUserFromToken(String token) {
+        token = token.substring(7);
+        String email = jwtService.extractEmail(token);
+        return getByEmail(email);
     }
 
 }

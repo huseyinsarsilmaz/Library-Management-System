@@ -12,4 +12,6 @@ public interface UserService {
     public User getByEmail(String email);
 
     public User promote(User user, User.Role newRole);
+
+    public User getUserFromToken(String token);
 }
