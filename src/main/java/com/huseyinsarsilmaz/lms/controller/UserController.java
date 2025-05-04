@@ -4,12 +4,14 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.huseyinsarsilmaz.lms.model.dto.request.PromoteRequest;
+import com.huseyinsarsilmaz.lms.model.dto.request.UserUpdateRequest;
 import com.huseyinsarsilmaz.lms.model.dto.response.ApiResponse;
 import com.huseyinsarsilmaz.lms.model.dto.response.PromoteResponse;
 import com.huseyinsarsilmaz.lms.model.dto.response.UserSimple;
@@ -46,5 +48,20 @@ public class UserController {
         User myUser = userService.getFromToken(token);
 
         return Utils.successResponse("User", "acquired", new UserSimple(myUser), HttpStatus.OK);
+    }
+
+    @PutMapping("/me")
+    public ResponseEntity<ApiResponse> updateUser(
+            @RequestHeader("Authorization") String token,
+            @Valid @RequestBody UserUpdateRequest req) {
+
+        User myUser = userService.getFromToken(token);
+        if (!myUser.getEmail().equals(req.getEmail())) {
+            userService.isEmailTaken(req.getEmail());
+        }
+
+        myUser = userService.update(myUser, req);
+
+        return Utils.successResponse("User Profile", "updated", new UserSimple(myUser), HttpStatus.OK);
     }
 }
