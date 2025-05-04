@@ -80,4 +80,13 @@ public class UserServiceImpl implements UserService {
         return getByEmail(email);
     }
 
+    public void checkUserRole(User user, User.Role requiredRole) {
+        String[] rolesArr = user.getRoles().split(",");
+        Set<String> roles = new HashSet<>(Arrays.asList(rolesArr));
+
+        if (!roles.contains(requiredRole.name())) {
+            throw new ForbiddenException();
+        }
+    }
+
 }
