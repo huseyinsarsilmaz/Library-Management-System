@@ -9,6 +9,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.huseyinsarsilmaz.lms.exception.AlreadyExistsException;
+import com.huseyinsarsilmaz.lms.exception.ForbiddenException;
 import com.huseyinsarsilmaz.lms.exception.NotFoundException;
 import com.huseyinsarsilmaz.lms.model.dto.request.RegisterRequest;
 import com.huseyinsarsilmaz.lms.model.entity.User;
@@ -56,6 +57,12 @@ public class UserServiceImpl implements UserService {
     }
 
     public User promote(User user, User.Role newRole) {
+        if (newRole == User.Role.ROLE_ADMIN) {
+            throw new ForbiddenException();
+        } else if (newRole == User.Role.ROLE_PATRON) {
+            return user;
+        }
+
         String[] currentRoles = user.getRoles().split(",");
         List<String> newRoles = new ArrayList<>(Arrays.asList(currentRoles));
 
