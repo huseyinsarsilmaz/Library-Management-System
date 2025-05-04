@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 public class PromoteRequest {
 
     @RequiredField(entityName = "User", fieldName = "email")
-    @Email(message = "Invalid email format")
+    @Email(message = "{fail.email.format}")
     private String email;
 
     @RequiredField(entityName = "User", fieldName = "new role")
