@@ -116,4 +116,23 @@ public class UserController {
 
         return Utils.successResponse("User Profile", "updated", new UserSimple(askedUser), HttpStatus.OK);
     }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<ApiResponse> deleteUser(
+            @RequestHeader("Authorization") String token,
+            @PathVariable("id") long id) {
+
+        User myUser = userService.getFromToken(token);
+        userService.checkRole(myUser, User.Role.ROLE_LIBRARIAN);
+
+        User askedUser = userService.getById(id);
+
+        if (askedUser.getRoles().contains(User.Role.ROLE_ADMIN.name())) {
+            userService.checkRole(myUser, User.Role.ROLE_ADMIN);
+        }
+
+        userService.deleteUser(askedUser);
+
+        return Utils.successResponse("User", "acquired", new UserSimple(askedUser), HttpStatus.OK);
+    }
 }
