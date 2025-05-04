@@ -13,7 +13,7 @@ public interface UserService {
 
     public User promote(User user, User.Role newRole);
 
-    public User getUserFromToken(String token);
+    public User getFromToken(String token);
 
-    public void checkUserRole(User user, User.Role requiredRole);
+    public void checkRole(User user, User.Role requiredRole);
 }

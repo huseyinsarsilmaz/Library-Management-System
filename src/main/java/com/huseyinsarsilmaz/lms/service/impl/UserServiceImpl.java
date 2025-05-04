@@ -78,13 +78,13 @@ public class UserServiceImpl implements UserService {
         return userRepository.save(user);
     }
 
-    public User getUserFromToken(String token) {
+    public User getFromToken(String token) {
         token = token.substring(7);
         String email = jwtService.extractEmail(token);
         return getByEmail(email);
     }
 
-    public void checkUserRole(User user, User.Role requiredRole) {
+    public void checkRole(User user, User.Role requiredRole) {
         String[] rolesArr = user.getRoles().split(",");
         Set<String> roles = new HashSet<>(Arrays.asList(rolesArr));
 

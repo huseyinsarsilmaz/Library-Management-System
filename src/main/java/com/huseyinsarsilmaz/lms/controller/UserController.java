@@ -31,8 +31,8 @@ public class UserController {
             @RequestHeader("Authorization") String token,
             @Valid @RequestBody PromoteRequest req) {
 
-        User myUser = userService.getUserFromToken(token);
-        userService.checkUserRole(myUser, User.Role.ROLE_ADMIN);
+        User myUser = userService.getFromToken(token);
+        userService.checkRole(myUser, User.Role.ROLE_ADMIN);
 
         User promotedUser = userService.getByEmail(req.getEmail());
         promotedUser = userService.promote(promotedUser, req.getNewRole());
@@ -43,9 +43,8 @@ public class UserController {
     @GetMapping("/me")
     public ResponseEntity<ApiResponse> getMyUser(@RequestHeader("Authorization") String token) {
 
-        User myUser = userService.getUserFromToken(token);
+        User myUser = userService.getFromToken(token);
 
         return Utils.successResponse("User", "acquired", new UserSimple(myUser), HttpStatus.OK);
     }
-
 }
