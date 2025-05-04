@@ -12,6 +12,7 @@ import com.huseyinsarsilmaz.lms.exception.AlreadyExistsException;
 import com.huseyinsarsilmaz.lms.exception.ForbiddenException;
 import com.huseyinsarsilmaz.lms.exception.NotFoundException;
 import com.huseyinsarsilmaz.lms.model.dto.request.RegisterRequest;
+import com.huseyinsarsilmaz.lms.model.dto.request.UserUpdateRequest;
 import com.huseyinsarsilmaz.lms.model.entity.User;
 import com.huseyinsarsilmaz.lms.repository.UserRepository;
 import com.huseyinsarsilmaz.lms.security.JwtService;
@@ -91,6 +92,16 @@ public class UserServiceImpl implements UserService {
         if (!roles.contains(requiredRole.name())) {
             throw new ForbiddenException();
         }
+    }
+
+    public User update(User user, UserUpdateRequest req) {
+
+        user.setEmail(req.getEmail());
+        user.setName(req.getName());
+        user.setSurname(req.getSurname());
+        user.setPhoneNumber(req.getPhoneNumber());
+
+        return userRepository.save(user);
     }
 
 }

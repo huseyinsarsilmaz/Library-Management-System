@@ -1,6 +1,7 @@
 package com.huseyinsarsilmaz.lms.service;
 
 import com.huseyinsarsilmaz.lms.model.dto.request.RegisterRequest;
+import com.huseyinsarsilmaz.lms.model.dto.request.UserUpdateRequest;
 import com.huseyinsarsilmaz.lms.model.entity.User;
 
 public interface UserService {
@@ -16,4 +17,6 @@ public interface UserService {
     public User getFromToken(String token);
 
     public void checkRole(User user, User.Role requiredRole);
+
+    public User update(User user, UserUpdateRequest req);
 }
