@@ -1,6 +1,7 @@
 package com.huseyinsarsilmaz.lms.service.impl;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -31,7 +32,7 @@ public class UserServiceImpl implements UserService {
     public User register(RegisterRequest req) {
         req.setPassword(passwordEncoder.encode(req.getPassword()));
         List<String> roles = new ArrayList<>();
-        roles.add(User.Role.LIBRARIAN.name());
+        roles.add(User.Role.ROLE_LIBRARIAN.name());
 
         User newUser = User.builder()
                 .email(req.getEmail())
@@ -39,7 +40,7 @@ public class UserServiceImpl implements UserService {
                 .name(req.getName())
                 .surname(req.getSurname())
                 .phoneNumber(req.getPhoneNumber())
-                .roles(roles.toString())
+                .roles(String.join(",", roles))
                 .build();
 
         return userRepository.save(newUser);
@@ -52,6 +53,16 @@ public class UserServiceImpl implements UserService {
         }
 
         return optUser.get();
+    }
+
+    public User promote(User user, User.Role newRole) {
+        String[] currentRoles = user.getRoles().split(",");
+        List<String> newRoles = new ArrayList<>(Arrays.asList(currentRoles));
+
+        newRoles.add(newRole.name());
+
+        user.setRoles(String.join(",", newRoles));
+        return userRepository.save(user);
     }
 
 }

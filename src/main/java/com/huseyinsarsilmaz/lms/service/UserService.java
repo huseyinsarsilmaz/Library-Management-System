@@ -10,4 +10,6 @@ public interface UserService {
     public User register(RegisterRequest req);
 
     public User getByEmail(String email);
+
+    public User promote(User user, User.Role newRole);
 }
