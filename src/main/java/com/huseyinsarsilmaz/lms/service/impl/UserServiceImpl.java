@@ -35,7 +35,7 @@ public class UserServiceImpl implements UserService {
     public User register(RegisterRequest req) {
         req.setPassword(passwordEncoder.encode(req.getPassword()));
         Set<String> roles = new HashSet<>();
-        roles.add(User.Role.ROLE_LIBRARIAN.name());
+        roles.add(User.Role.ROLE_PATRON.name());
 
         User newUser = User.builder()
                 .email(req.getEmail())
