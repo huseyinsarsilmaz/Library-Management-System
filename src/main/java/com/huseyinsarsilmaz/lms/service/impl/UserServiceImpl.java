@@ -68,6 +68,10 @@ public class UserServiceImpl implements UserService {
         String[] currentRoles = user.getRoles().split(",");
         Set<String> newRoles = new HashSet<>(Arrays.asList(currentRoles));
 
+        if (newRoles.contains(newRole.name())) {
+            return user;
+        }
+
         newRoles.add(newRole.name());
 
         user.setRoles(String.join(",", newRoles));
