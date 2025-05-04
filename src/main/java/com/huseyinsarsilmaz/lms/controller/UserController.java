@@ -30,7 +30,7 @@ import lombok.RequiredArgsConstructor;
 public class UserController {
     private final UserService userService;
 
-    private User authorizeAccessToUser(String token, long targetUserId, User.Role baseRole) {
+    private User authorizeModifyAccessToUser(String token, long targetUserId, User.Role baseRole) {
         User myUser = userService.getFromToken(token);
         userService.checkRole(myUser, baseRole);
 
@@ -41,6 +41,22 @@ public class UserController {
                 roles.contains(User.Role.ROLE_LIBRARIAN.name());
 
         if (isManager) {
+            userService.checkRole(myUser, User.Role.ROLE_ADMIN);
+        }
+
+        return targetUser;
+    }
+
+    private User authorizeReadAccessToUser(String token, long targetUserId, User.Role baseRole) {
+        User myUser = userService.getFromToken(token);
+        userService.checkRole(myUser, baseRole);
+
+        User targetUser = userService.getById(targetUserId);
+        String roles = targetUser.getRoles();
+
+        boolean isAdmin = roles.contains(User.Role.ROLE_ADMIN.name());
+
+        if (isAdmin) {
             userService.checkRole(myUser, User.Role.ROLE_ADMIN);
         }
 
@@ -99,7 +115,7 @@ public class UserController {
             @RequestHeader("Authorization") String token,
             @PathVariable("id") long id) {
 
-        User targetUser = authorizeAccessToUser(token, id, User.Role.ROLE_LIBRARIAN);
+        User targetUser = authorizeReadAccessToUser(token, id, User.Role.ROLE_LIBRARIAN);
 
         return Utils.successResponse("User", "acquired", new UserSimple(targetUser), HttpStatus.OK);
     }
@@ -110,7 +126,7 @@ public class UserController {
             @Valid @RequestBody UserUpdateRequest req,
             @PathVariable("id") long id) {
 
-        User targetUser = authorizeAccessToUser(token, id, User.Role.ROLE_LIBRARIAN);
+        User targetUser = authorizeModifyAccessToUser(token, id, User.Role.ROLE_LIBRARIAN);
 
         if (!targetUser.getEmail().equals(req.getEmail())) {
             userService.isEmailTaken(req.getEmail());
@@ -126,7 +142,7 @@ public class UserController {
             @RequestHeader("Authorization") String token,
             @PathVariable("id") long id) {
 
-        User targetUser = authorizeAccessToUser(token, id, User.Role.ROLE_LIBRARIAN);
+        User targetUser = authorizeModifyAccessToUser(token, id, User.Role.ROLE_LIBRARIAN);
 
         userService.deleteUser(targetUser);
 
