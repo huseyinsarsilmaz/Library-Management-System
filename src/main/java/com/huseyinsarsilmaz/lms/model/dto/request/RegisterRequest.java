@@ -1,5 +1,6 @@
 package com.huseyinsarsilmaz.lms.model.dto.request;
 
+import com.huseyinsarsilmaz.lms.validation.Alphabethical;
 import com.huseyinsarsilmaz.lms.validation.RequiredField;
 import com.huseyinsarsilmaz.lms.validation.StrSize;
 
@@ -21,9 +22,14 @@ public class RegisterRequest {
     private String password;
 
     @RequiredField(entityName = "User", fieldName = "name")
+    @StrSize(entityName = "User", fieldName = "name", min = 2, max = 32)
+    @Alphabethical(entityName = "User", fieldName = "name")
+
     private String name;
 
     @RequiredField(entityName = "User", fieldName = "surname")
+    @StrSize(entityName = "User", fieldName = "surname", min = 2, max = 32)
+    @Alphabethical(entityName = "User", fieldName = "surname")
     private String surname;
 
     @RequiredField(entityName = "User", fieldName = "phone number")
