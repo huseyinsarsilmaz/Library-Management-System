@@ -1,9 +1,9 @@
 package com.huseyinsarsilmaz.lms.service.impl;
 
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
+import java.util.HashSet;
 import java.util.Optional;
+import java.util.Set;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -32,7 +32,7 @@ public class UserServiceImpl implements UserService {
 
     public User register(RegisterRequest req) {
         req.setPassword(passwordEncoder.encode(req.getPassword()));
-        List<String> roles = new ArrayList<>();
+        Set<String> roles = new HashSet<>();
         roles.add(User.Role.ROLE_LIBRARIAN.name());
 
         User newUser = User.builder()
@@ -64,7 +64,7 @@ public class UserServiceImpl implements UserService {
         }
 
         String[] currentRoles = user.getRoles().split(",");
-        List<String> newRoles = new ArrayList<>(Arrays.asList(currentRoles));
+        Set<String> newRoles = new HashSet<>(Arrays.asList(currentRoles));
 
         newRoles.add(newRole.name());
 
