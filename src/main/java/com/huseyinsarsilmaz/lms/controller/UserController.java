@@ -53,7 +53,7 @@ public class UserController {
     }
 
     @PutMapping("/me")
-    public ResponseEntity<ApiResponse> updateUser(
+    public ResponseEntity<ApiResponse> updateMyUser(
             @RequestHeader("Authorization") String token,
             @Valid @RequestBody UserUpdateRequest req) {
 
@@ -78,7 +78,7 @@ public class UserController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ApiResponse> getMyUser(
+    public ResponseEntity<ApiResponse> getUser(
             @RequestHeader("Authorization") String token,
             @PathVariable("id") long id) {
 
@@ -87,6 +87,33 @@ public class UserController {
 
         User askedUser = userService.getById(id);
 
+        if (askedUser.getRoles().contains(User.Role.ROLE_ADMIN.name())) {
+            userService.checkRole(myUser, User.Role.ROLE_ADMIN);
+        }
+
         return Utils.successResponse("User", "acquired", new UserSimple(askedUser), HttpStatus.OK);
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<ApiResponse> updateUser(
+            @RequestHeader("Authorization") String token,
+            @Valid @RequestBody UserUpdateRequest req,
+            @PathVariable("id") long id) {
+
+        User myUser = userService.getFromToken(token);
+        userService.checkRole(myUser, User.Role.ROLE_LIBRARIAN);
+        User askedUser = userService.getById(id);
+
+        if (askedUser.getRoles().contains(User.Role.ROLE_ADMIN.name())) {
+            userService.checkRole(myUser, User.Role.ROLE_ADMIN);
+        }
+
+        if (!askedUser.getEmail().equals(req.getEmail())) {
+            userService.isEmailTaken(req.getEmail());
+        }
+
+        askedUser = userService.update(askedUser, req);
+
+        return Utils.successResponse("User Profile", "updated", new UserSimple(askedUser), HttpStatus.OK);
     }
 }
