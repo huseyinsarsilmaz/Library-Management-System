@@ -2,6 +2,7 @@ package com.huseyinsarsilmaz.lms.controller;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -63,5 +64,15 @@ public class UserController {
         myUser = userService.update(myUser, req);
 
         return Utils.successResponse("User Profile", "updated", new UserSimple(myUser), HttpStatus.OK);
+    }
+
+    @DeleteMapping("/me")
+    public ResponseEntity<ApiResponse> deleteMyUser(@RequestHeader("Authorization") String token) {
+
+        User myUser = userService.getFromToken(token);
+
+        userService.deleteUser(myUser);
+
+        return Utils.successResponse("User", "deleted", new UserSimple(myUser), HttpStatus.OK);
     }
 }
