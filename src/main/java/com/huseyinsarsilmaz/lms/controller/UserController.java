@@ -30,6 +30,23 @@ import lombok.RequiredArgsConstructor;
 public class UserController {
     private final UserService userService;
 
+    private User authorizeAccessToUser(String token, long targetUserId, User.Role baseRole) {
+        User myUser = userService.getFromToken(token);
+        userService.checkRole(myUser, baseRole);
+
+        User targetUser = userService.getById(targetUserId);
+        String roles = targetUser.getRoles();
+
+        boolean isManager = roles.contains(User.Role.ROLE_ADMIN.name()) ||
+                roles.contains(User.Role.ROLE_LIBRARIAN.name());
+
+        if (isManager) {
+            userService.checkRole(myUser, User.Role.ROLE_ADMIN);
+        }
+
+        return targetUser;
+    }
+
     @PostMapping("/promote")
     public ResponseEntity<ApiResponse> promote(
             @RequestHeader("Authorization") String token,
@@ -82,16 +99,9 @@ public class UserController {
             @RequestHeader("Authorization") String token,
             @PathVariable("id") long id) {
 
-        User myUser = userService.getFromToken(token);
-        userService.checkRole(myUser, User.Role.ROLE_LIBRARIAN);
+        User targetUser = authorizeAccessToUser(token, id, User.Role.ROLE_LIBRARIAN);
 
-        User askedUser = userService.getById(id);
-
-        if (askedUser.getRoles().contains(User.Role.ROLE_ADMIN.name())) {
-            userService.checkRole(myUser, User.Role.ROLE_ADMIN);
-        }
-
-        return Utils.successResponse("User", "acquired", new UserSimple(askedUser), HttpStatus.OK);
+        return Utils.successResponse("User", "acquired", new UserSimple(targetUser), HttpStatus.OK);
     }
 
     @PutMapping("/{id}")
@@ -100,21 +110,15 @@ public class UserController {
             @Valid @RequestBody UserUpdateRequest req,
             @PathVariable("id") long id) {
 
-        User myUser = userService.getFromToken(token);
-        userService.checkRole(myUser, User.Role.ROLE_LIBRARIAN);
-        User askedUser = userService.getById(id);
+        User targetUser = authorizeAccessToUser(token, id, User.Role.ROLE_LIBRARIAN);
 
-        if (askedUser.getRoles().contains(User.Role.ROLE_ADMIN.name())) {
-            userService.checkRole(myUser, User.Role.ROLE_ADMIN);
-        }
-
-        if (!askedUser.getEmail().equals(req.getEmail())) {
+        if (!targetUser.getEmail().equals(req.getEmail())) {
             userService.isEmailTaken(req.getEmail());
         }
 
-        askedUser = userService.update(askedUser, req);
+        targetUser = userService.update(targetUser, req);
 
-        return Utils.successResponse("User Profile", "updated", new UserSimple(askedUser), HttpStatus.OK);
+        return Utils.successResponse("User Profile", "updated", new UserSimple(targetUser), HttpStatus.OK);
     }
 
     @DeleteMapping("/{id}")
@@ -122,17 +126,10 @@ public class UserController {
             @RequestHeader("Authorization") String token,
             @PathVariable("id") long id) {
 
-        User myUser = userService.getFromToken(token);
-        userService.checkRole(myUser, User.Role.ROLE_LIBRARIAN);
+        User targetUser = authorizeAccessToUser(token, id, User.Role.ROLE_LIBRARIAN);
 
-        User askedUser = userService.getById(id);
+        userService.deleteUser(targetUser);
 
-        if (askedUser.getRoles().contains(User.Role.ROLE_ADMIN.name())) {
-            userService.checkRole(myUser, User.Role.ROLE_ADMIN);
-        }
-
-        userService.deleteUser(askedUser);
-
-        return Utils.successResponse("User", "acquired", new UserSimple(askedUser), HttpStatus.OK);
+        return Utils.successResponse("User", "acquired", new UserSimple(targetUser), HttpStatus.OK);
     }
 }
