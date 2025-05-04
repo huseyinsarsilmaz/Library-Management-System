@@ -4,6 +4,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -74,5 +75,18 @@ public class UserController {
         userService.deleteUser(myUser);
 
         return Utils.successResponse("User", "deleted", new UserSimple(myUser), HttpStatus.OK);
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<ApiResponse> getMyUser(
+            @RequestHeader("Authorization") String token,
+            @PathVariable("id") long id) {
+
+        User myUser = userService.getFromToken(token);
+        userService.checkRole(myUser, User.Role.ROLE_LIBRARIAN);
+
+        User askedUser = userService.getById(id);
+
+        return Utils.successResponse("User", "acquired", new UserSimple(askedUser), HttpStatus.OK);
     }
 }
