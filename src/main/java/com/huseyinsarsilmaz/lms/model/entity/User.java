@@ -27,6 +27,7 @@ public class User extends LmsEntity {
     public enum Role {
         PATRON,
         LIBRARIAN,
+        ADMIN
     }
 
 }
