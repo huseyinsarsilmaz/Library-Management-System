@@ -2,6 +2,7 @@ package com.huseyinsarsilmaz.lms.service.impl;
 
 import org.springframework.stereotype.Service;
 
+import com.huseyinsarsilmaz.lms.exception.AlreadyExistsException;
 import com.huseyinsarsilmaz.lms.model.dto.request.BookCreateRequest;
 import com.huseyinsarsilmaz.lms.model.entity.Book;
 import com.huseyinsarsilmaz.lms.repository.BookRepository;
@@ -26,6 +27,12 @@ public class BookServiceImpl implements BookService {
                 .build();
 
         return bookRepository.save(newBook);
+    }
+
+    public void isIsbnTaken(String isbn) {
+        if (bookRepository.findByIsbn(isbn).isPresent()) {
+            throw new AlreadyExistsException(Book.class.getSimpleName(), "isbn");
+        }
     }
 
 }
