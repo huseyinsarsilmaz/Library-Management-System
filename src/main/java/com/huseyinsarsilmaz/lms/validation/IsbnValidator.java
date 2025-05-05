@@ -36,7 +36,7 @@ public class IsbnValidator implements ConstraintValidator<Isbn, String> {
         if (!ISBN_PATTERN.matcher(value).matches()) {
             context.disableDefaultConstraintViolation();
 
-            String messageTemplate = messageSource.getMessage("fail.characters", null, LocaleContextHolder.getLocale());
+            String messageTemplate = messageSource.getMessage("fail.isbn", null, LocaleContextHolder.getLocale());
             String message = String.format(messageTemplate, entityName, fieldName);
 
             context.buildConstraintViolationWithTemplate(message).addConstraintViolation();
