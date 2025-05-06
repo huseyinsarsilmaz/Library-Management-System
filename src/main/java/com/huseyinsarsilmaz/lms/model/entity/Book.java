@@ -52,4 +52,11 @@ public class Book extends LmsEntity {
         TRAVEL,
         OTHER
     }
+
+    public enum SearchType {
+        TITLE,
+        AUTHOR,
+        ISBN,
+        GENRE
+    }
 }
