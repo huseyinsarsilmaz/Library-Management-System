@@ -12,7 +12,7 @@ public interface UserService {
 
     public User getByEmail(String email);
 
-    public User getById(Long id);
+    public User getById(long id);
 
     public User promote(User user, User.Role newRole);
 

@@ -59,7 +59,7 @@ public class UserServiceImpl implements UserService {
         return optUser.get();
     }
 
-    public User getById(Long id) {
+    public User getById(long id) {
         Optional<User> optUser = userRepository.findById(id);
         if (optUser.isEmpty()) {
             throw new NotFoundException(User.class.getSimpleName(), "id");
