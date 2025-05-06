@@ -2,6 +2,7 @@ package com.huseyinsarsilmaz.lms.controller;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -74,6 +75,20 @@ public class BookController {
         book = bookService.update(book, req);
 
         return Utils.successResponse(Book.class.getSimpleName(), "updated", new BookSimple(book), HttpStatus.OK);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<ApiResponse> deleteBook(
+            @RequestHeader("Authorization") String token,
+            @PathVariable("id") long id) {
+
+        User myUser = userService.getFromToken(token);
+        userService.checkRole(myUser, User.Role.ROLE_LIBRARIAN);
+
+        Book book = bookService.getById(id);
+        bookService.delete(book);
+
+        return Utils.successResponse(Book.class.getSimpleName(), "deleted", new BookSimple(book), HttpStatus.OK);
     }
 
 }
