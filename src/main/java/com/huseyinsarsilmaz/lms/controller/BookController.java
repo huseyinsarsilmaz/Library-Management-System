@@ -2,6 +2,8 @@ package com.huseyinsarsilmaz.lms.controller;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -42,6 +44,14 @@ public class BookController {
 
         return Utils.successResponse(Book.class.getSimpleName(), "created", new BookSimple(newBook),
                 HttpStatus.OK);
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<ApiResponse> getBook(@PathVariable("id") long id) {
+
+        Book book = bookService.getById(id);
+
+        return Utils.successResponse("Book", "acquired", new BookSimple(book), HttpStatus.OK);
     }
 
 }
