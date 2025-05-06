@@ -5,12 +5,14 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.huseyinsarsilmaz.lms.model.dto.request.BookCreateRequest;
+import com.huseyinsarsilmaz.lms.model.dto.request.BookUpdateRequest;
 import com.huseyinsarsilmaz.lms.model.dto.response.ApiResponse;
 import com.huseyinsarsilmaz.lms.model.dto.response.BookSimple;
 import com.huseyinsarsilmaz.lms.model.entity.Book;
@@ -51,7 +53,22 @@ public class BookController {
 
         Book book = bookService.getById(id);
 
-        return Utils.successResponse("Book", "acquired", new BookSimple(book), HttpStatus.OK);
+        return Utils.successResponse(Book.class.getSimpleName(), "acquired", new BookSimple(book), HttpStatus.OK);
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<ApiResponse> updateBook(
+            @RequestHeader("Authorization") String token,
+            @Valid @RequestBody BookUpdateRequest req,
+            @PathVariable("id") long id) {
+
+        User myUser = userService.getFromToken(token);
+        userService.checkRole(myUser, User.Role.ROLE_LIBRARIAN);
+
+        Book book = bookService.getById(id);
+        book = bookService.update(book, req);
+
+        return Utils.successResponse(Book.class.getSimpleName(), "updated", new BookSimple(book), HttpStatus.OK);
     }
 
 }

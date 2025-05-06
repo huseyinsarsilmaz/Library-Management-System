@@ -1,6 +1,7 @@
 package com.huseyinsarsilmaz.lms.service;
 
 import com.huseyinsarsilmaz.lms.model.dto.request.BookCreateRequest;
+import com.huseyinsarsilmaz.lms.model.dto.request.BookUpdateRequest;
 import com.huseyinsarsilmaz.lms.model.entity.Book;
 
 public interface BookService {
@@ -10,4 +11,6 @@ public interface BookService {
     public void isIsbnTaken(String isbn);
 
     public Book getById(long id);
+
+    public Book update(Book book, BookUpdateRequest req);
 }
