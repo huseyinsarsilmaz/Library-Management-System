@@ -1,7 +1,9 @@
 package com.huseyinsarsilmaz.lms.exception;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -12,6 +14,7 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 import com.huseyinsarsilmaz.lms.model.dto.response.ApiResponse;
 import com.huseyinsarsilmaz.lms.service.Utils;
@@ -45,6 +48,34 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ApiResponse> handleBadCredentialsException(BadCredentialsException ex) {
         return Utils.failResponse("failed", new String[] { "User login" }, ex.getMessage(), HttpStatus.UNAUTHORIZED);
 
+    }
+
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ResponseEntity<ApiResponse> handleMethodArgumentTypeMismatchException(
+            MethodArgumentTypeMismatchException ex) {
+        String name = ex.getName();
+
+        Object valueObj = ex.getValue();
+        String value = (valueObj != null) ? valueObj.toString() : "null";
+
+        Class<?> requiredTypeClass = ex.getRequiredType();
+        String type = "unknown";
+        String validValueList = "";
+
+        if (requiredTypeClass != null) {
+            type = requiredTypeClass.getSimpleName();
+
+            if (requiredTypeClass.isEnum()) {
+                Object[] constants = requiredTypeClass.getEnumConstants();
+                String validValues = Arrays.stream(constants)
+                        .map(Object::toString)
+                        .collect(Collectors.joining(", "));
+                validValueList = "Valid Values: " + validValues;
+            }
+        }
+
+        return Utils.failResponse("invalid.type", new String[] { name, type, value, validValueList }, ex.getMessage(),
+                HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(InternalAuthenticationServiceException.class)
