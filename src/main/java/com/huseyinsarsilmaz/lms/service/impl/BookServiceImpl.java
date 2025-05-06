@@ -2,6 +2,8 @@ package com.huseyinsarsilmaz.lms.service.impl;
 
 import java.util.Optional;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.huseyinsarsilmaz.lms.exception.AlreadyExistsException;
@@ -62,6 +64,23 @@ public class BookServiceImpl implements BookService {
 
     public void delete(Book book) {
         bookRepository.delete(book);
+    }
+
+    public Page<Book> searchBooks(Book.SearchType searchType, String query, Pageable pageable) {
+        return switch (searchType) {
+            case TITLE -> bookRepository.findByTitleContainingIgnoreCase(query, pageable);
+            case AUTHOR -> bookRepository.findByAuthorContainingIgnoreCase(query, pageable);
+            case ISBN -> bookRepository.findByIsbnContainingIgnoreCase(query, pageable);
+            case GENRE -> {
+                Book.Genre genre;
+                try {
+                    genre = Book.Genre.valueOf(query.toUpperCase().replace('-', '_'));
+                } catch (IllegalArgumentException e) {
+                    throw new NotFoundException("Genre", "name");
+                }
+                yield bookRepository.findByGenre(genre, pageable);
+            }
+        };
     }
 
 }
