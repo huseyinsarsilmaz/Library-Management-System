@@ -113,7 +113,7 @@ public class UserServiceImpl implements UserService {
         return userRepository.save(user);
     }
 
-    public void deleteUser(User user) {
+    public void delete(User user) {
         userRepository.delete(user);
     }
 }

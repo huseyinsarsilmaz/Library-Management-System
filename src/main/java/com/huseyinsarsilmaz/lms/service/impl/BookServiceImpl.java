@@ -60,4 +60,8 @@ public class BookServiceImpl implements BookService {
         return bookRepository.save(book);
     }
 
+    public void delete(Book book) {
+        bookRepository.delete(book);
+    }
+
 }

@@ -105,7 +105,7 @@ public class UserController {
 
         User myUser = userService.getFromToken(token);
 
-        userService.deleteUser(myUser);
+        userService.delete(myUser);
 
         return Utils.successResponse("User", "deleted", new UserSimple(myUser), HttpStatus.OK);
     }
@@ -144,7 +144,7 @@ public class UserController {
 
         User targetUser = authorizeModifyAccessToUser(token, id, User.Role.ROLE_LIBRARIAN);
 
-        userService.deleteUser(targetUser);
+        userService.delete(targetUser);
 
         return Utils.successResponse("User", "acquired", new UserSimple(targetUser), HttpStatus.OK);
     }

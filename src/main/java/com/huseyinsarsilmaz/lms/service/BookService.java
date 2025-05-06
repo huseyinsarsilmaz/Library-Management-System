@@ -13,4 +13,6 @@ public interface BookService {
     public Book getById(long id);
 
     public Book update(Book book, BookUpdateRequest req);
+
+    public void delete(Book book);
 }
