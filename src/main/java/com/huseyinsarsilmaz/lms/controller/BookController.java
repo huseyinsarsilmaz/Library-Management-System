@@ -1,5 +1,8 @@
 package com.huseyinsarsilmaz.lms.controller;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -10,12 +13,14 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.huseyinsarsilmaz.lms.model.dto.request.BookCreateRequest;
 import com.huseyinsarsilmaz.lms.model.dto.request.BookUpdateRequest;
 import com.huseyinsarsilmaz.lms.model.dto.response.ApiResponse;
 import com.huseyinsarsilmaz.lms.model.dto.response.BookSimple;
+import com.huseyinsarsilmaz.lms.model.dto.response.PagedResponse;
 import com.huseyinsarsilmaz.lms.model.entity.Book;
 import com.huseyinsarsilmaz.lms.model.entity.User;
 import com.huseyinsarsilmaz.lms.service.BookService;
@@ -89,6 +94,19 @@ public class BookController {
         bookService.delete(book);
 
         return Utils.successResponse(Book.class.getSimpleName(), "deleted", new BookSimple(book), HttpStatus.OK);
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<ApiResponse> searchBooks(
+            @RequestParam Book.SearchType type,
+            @RequestParam String query,
+            @PageableDefault(size = 10, sort = "title") Pageable pageable) {
+
+        Page<BookSimple> books = bookService.searchBooks(type, query, pageable)
+                .map(BookSimple::new);
+
+        return Utils.successResponse(Book.class.getSimpleName() + "s", "acquired", new PagedResponse<BookSimple>(books),
+                HttpStatus.OK);
     }
 
 }
