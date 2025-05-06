@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import com.huseyinsarsilmaz.lms.exception.AlreadyExistsException;
 import com.huseyinsarsilmaz.lms.exception.NotFoundException;
 import com.huseyinsarsilmaz.lms.model.dto.request.BookCreateRequest;
+import com.huseyinsarsilmaz.lms.model.dto.request.BookUpdateRequest;
 import com.huseyinsarsilmaz.lms.model.entity.Book;
 import com.huseyinsarsilmaz.lms.repository.BookRepository;
 import com.huseyinsarsilmaz.lms.service.BookService;
@@ -45,6 +46,18 @@ public class BookServiceImpl implements BookService {
         }
 
         return optBook.get();
+    }
+
+    public Book update(Book book, BookUpdateRequest req) {
+
+        book.setTitle(req.getTitle());
+        book.setAuthor(req.getAuthor());
+        book.setDescription(req.getDescription());
+        book.setIsbn(req.getIsbn());
+        book.setPublicationDate(req.getPublicationDate());
+        book.setGenre(req.getGenre());
+
+        return bookRepository.save(book);
     }
 
 }
