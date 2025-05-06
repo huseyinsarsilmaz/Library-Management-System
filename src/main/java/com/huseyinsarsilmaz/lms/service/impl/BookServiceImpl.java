@@ -1,8 +1,11 @@
 package com.huseyinsarsilmaz.lms.service.impl;
 
+import java.util.Optional;
+
 import org.springframework.stereotype.Service;
 
 import com.huseyinsarsilmaz.lms.exception.AlreadyExistsException;
+import com.huseyinsarsilmaz.lms.exception.NotFoundException;
 import com.huseyinsarsilmaz.lms.model.dto.request.BookCreateRequest;
 import com.huseyinsarsilmaz.lms.model.entity.Book;
 import com.huseyinsarsilmaz.lms.repository.BookRepository;
@@ -33,6 +36,15 @@ public class BookServiceImpl implements BookService {
         if (bookRepository.findByIsbn(isbn).isPresent()) {
             throw new AlreadyExistsException(Book.class.getSimpleName(), "isbn");
         }
+    }
+
+    public Book getById(long id) {
+        Optional<Book> optBook = bookRepository.findById(id);
+        if (optBook.isEmpty()) {
+            throw new NotFoundException(Book.class.getSimpleName(), "id");
+        }
+
+        return optBook.get();
     }
 
 }

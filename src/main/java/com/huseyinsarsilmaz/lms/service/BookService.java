@@ -8,4 +8,6 @@ public interface BookService {
     public Book create(BookCreateRequest req);
 
     public void isIsbnTaken(String isbn);
+
+    public Book getById(long id);
 }
