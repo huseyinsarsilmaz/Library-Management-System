@@ -66,6 +66,11 @@ public class BookController {
         userService.checkRole(myUser, User.Role.ROLE_LIBRARIAN);
 
         Book book = bookService.getById(id);
+
+        if (!book.getIsbn().equals(req.getIsbn())) {
+            bookService.isIsbnTaken(req.getIsbn());
+        }
+
         book = bookService.update(book, req);
 
         return Utils.successResponse(Book.class.getSimpleName(), "updated", new BookSimple(book), HttpStatus.OK);
