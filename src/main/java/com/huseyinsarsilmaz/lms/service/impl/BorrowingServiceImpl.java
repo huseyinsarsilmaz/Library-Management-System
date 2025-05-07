@@ -7,6 +7,7 @@ import java.util.Optional;
 import org.springframework.stereotype.Service;
 
 import com.huseyinsarsilmaz.lms.exception.AlreadyBorrowedException;
+import com.huseyinsarsilmaz.lms.exception.AlreadyReturnedBorrowingException;
 import com.huseyinsarsilmaz.lms.exception.ForbiddenException;
 import com.huseyinsarsilmaz.lms.exception.NotFoundException;
 import com.huseyinsarsilmaz.lms.model.dto.request.BorrowRequest;
@@ -69,6 +70,25 @@ public class BorrowingServiceImpl implements BorrowingService {
         if (user.getId() != borrowing.getBorrower().getId()) {
             throw new ForbiddenException();
         }
+    }
+
+    public void checkReturnable(Borrowing borrowing) {
+        if (borrowing.isReturned()) {
+            throw new AlreadyReturnedBorrowingException();
+        }
+    }
+
+    public Borrowing returnBorrowing(Borrowing borrowing) {
+        LocalDate now = LocalDate.now();
+        borrowing.setReturnDate(now);
+
+        if (borrowing.getDueDate().isBefore(now)) {
+            borrowing.setStatus(Borrowing.Status.RETURNED_OVERDUE);
+        } else {
+            borrowing.setStatus(Borrowing.Status.RETURNED_TIMELY);
+        }
+
+        return borrowingRepository.save(borrowing);
     }
 
 }
