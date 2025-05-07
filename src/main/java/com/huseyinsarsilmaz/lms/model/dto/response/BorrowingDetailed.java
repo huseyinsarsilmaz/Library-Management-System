@@ -12,12 +12,10 @@ import lombok.EqualsAndHashCode;
 public class BorrowingDetailed extends BorrowingSimple {
 
     private final LocalDate returnDate;
-    private final Borrowing.Status status;
 
     public BorrowingDetailed(Borrowing borrowing) {
         super(borrowing);
         this.returnDate = borrowing.getReturnDate();
-        this.status = borrowing.getStatus();
 
     }
 }

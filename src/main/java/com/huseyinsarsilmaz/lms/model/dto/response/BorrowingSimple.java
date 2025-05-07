@@ -14,6 +14,7 @@ public class BorrowingSimple {
     private final BookSimple book;
     private final LocalDate borrowDate;
     private final LocalDate dueDate;
+    private final Borrowing.Status status;
 
     public BorrowingSimple(Borrowing borrowing) {
         this.id = borrowing.getId();
@@ -21,6 +22,7 @@ public class BorrowingSimple {
         this.book = new BookSimple(borrowing.getBook());
         this.borrowDate = borrowing.getBorrowDate();
         this.dueDate = borrowing.getDueDate();
+        this.status = borrowing.getStatus();
 
     }
 }
