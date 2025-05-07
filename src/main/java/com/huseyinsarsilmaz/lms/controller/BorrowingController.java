@@ -96,4 +96,19 @@ public class BorrowingController {
                 HttpStatus.OK);
     }
 
+    @GetMapping("/user/{id}")
+    public ResponseEntity<ApiResponse> getBorrowingHistory(
+            @RequestHeader("Authorization") String token,
+            @PathVariable("id") long id) {
+
+        User myUser = userService.getFromToken(token);
+        userService.checkRole(myUser, User.Role.ROLE_LIBRARIAN);
+
+        List<Borrowing> borrowings = borrowingService.getByBorrowerId(id);
+        BorrowingHistory borrowingHistory = getBorrowingHistory(borrowings);
+
+        return Utils.successResponse(Borrowing.class.getSimpleName() + " history", "acquired", borrowingHistory,
+                HttpStatus.OK);
+    }
+
 }
