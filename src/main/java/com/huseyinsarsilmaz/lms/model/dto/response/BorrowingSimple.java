@@ -2,9 +2,7 @@ package com.huseyinsarsilmaz.lms.model.dto.response;
 
 import java.time.LocalDate;
 
-import com.huseyinsarsilmaz.lms.model.entity.Book;
 import com.huseyinsarsilmaz.lms.model.entity.Borrowing;
-import com.huseyinsarsilmaz.lms.model.entity.User;
 
 import lombok.Data;
 
@@ -12,14 +10,14 @@ import lombok.Data;
 public class BorrowingSimple {
 
     private final long id;
-    private final User borrower;
-    private final Book book;
+    private final UserSimple borrower;
+    private final BookSimple book;
     private final LocalDate dueDate;
 
     public BorrowingSimple(Borrowing borrowing) {
         this.id = borrowing.getId();
-        this.borrower = borrowing.getBorrower();
-        this.book = borrowing.getBook();
+        this.borrower = new UserSimple(borrowing.getBorrower());
+        this.book = new BookSimple(borrowing.getBook());
         this.dueDate = borrowing.getDueDate();
 
     }
