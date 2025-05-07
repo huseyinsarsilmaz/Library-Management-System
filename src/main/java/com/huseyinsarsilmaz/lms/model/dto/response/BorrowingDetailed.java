@@ -11,13 +11,11 @@ import lombok.EqualsAndHashCode;
 @EqualsAndHashCode(callSuper = true)
 public class BorrowingDetailed extends BorrowingSimple {
 
-    private final LocalDate borrowDate;
     private final LocalDate returnDate;
     private final Borrowing.Status status;
 
     public BorrowingDetailed(Borrowing borrowing) {
         super(borrowing);
-        this.borrowDate = borrowing.getBorrowDate();
         this.returnDate = borrowing.getReturnDate();
         this.status = borrowing.getStatus();
 
