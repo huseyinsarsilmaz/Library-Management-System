@@ -7,6 +7,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.huseyinsarsilmaz.lms.exception.AlreadyExistsException;
+import com.huseyinsarsilmaz.lms.exception.NotAvailableException;
 import com.huseyinsarsilmaz.lms.exception.NotFoundException;
 import com.huseyinsarsilmaz.lms.model.dto.request.BookCreateRequest;
 import com.huseyinsarsilmaz.lms.model.dto.request.BookUpdateRequest;
@@ -90,6 +91,12 @@ public class BookServiceImpl implements BookService {
         }
 
         return book;
+    }
+
+    public void checkAvailability(Book book) {
+        if (!book.getIsAvailable()) {
+            throw new NotAvailableException(Book.class.getSimpleName());
+        }
     }
 
 }

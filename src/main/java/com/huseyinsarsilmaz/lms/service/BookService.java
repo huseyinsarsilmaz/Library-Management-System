@@ -22,4 +22,6 @@ public interface BookService {
     public Page<Book> searchBooks(Book.SearchType searchType, String query, Pageable pageable);
 
     public Book changeAvailability(Book book, boolean newAvailability);
+
+    public void checkAvailability(Book book);
 }
