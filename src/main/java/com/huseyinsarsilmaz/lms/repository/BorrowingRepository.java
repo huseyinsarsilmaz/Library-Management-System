@@ -19,4 +19,7 @@ public interface BorrowingRepository extends JpaRepository<Borrowing, Long> {
     @Query("SELECT b FROM Borrowing b JOIN FETCH b.book JOIN FETCH b.borrower WHERE b.id = :id")
     Optional<Borrowing> findByIdWithBookAndBorrower(@Param("id") Long id);
 
+    @Query("SELECT b FROM Borrowing b JOIN FETCH b.book WHERE b.borrower.id = :borrowerId")
+    List<Borrowing> findAllByBorrowerIdWithBook(@Param("borrowerId") Long borrowerId);
+
 }
