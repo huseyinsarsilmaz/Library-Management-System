@@ -1,5 +1,7 @@
 package com.huseyinsarsilmaz.lms.service;
 
+import java.util.List;
+
 import com.huseyinsarsilmaz.lms.model.dto.request.BorrowRequest;
 import com.huseyinsarsilmaz.lms.model.entity.Borrowing;
 import com.huseyinsarsilmaz.lms.model.entity.User;
@@ -16,5 +18,7 @@ public interface BorrowingService {
 
     // Used entity name because return is a keyword
     public Borrowing returnBorrowing(Borrowing borrowing);
+
+    public List<Borrowing> getByBorrowerId(long borrowerId);
 
 }

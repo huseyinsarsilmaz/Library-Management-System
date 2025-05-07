@@ -96,4 +96,9 @@ public class BorrowingServiceImpl implements BorrowingService {
         return borrowingRepository.save(borrowing);
     }
 
+    public List<Borrowing> getByBorrowerId(long borrowerId) {
+        return borrowingRepository.findAllByBorrowerIdWithBook(borrowerId);
+
+    }
+
 }

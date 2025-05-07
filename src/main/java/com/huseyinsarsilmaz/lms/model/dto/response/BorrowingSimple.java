@@ -13,7 +13,6 @@ public class BorrowingSimple {
     private final UserSimple borrower;
     private final BookSimple book;
     private final LocalDate borrowDate;
-
     private final LocalDate dueDate;
 
     public BorrowingSimple(Borrowing borrowing) {
