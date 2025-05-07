@@ -46,6 +46,7 @@ public class BorrowingServiceImpl implements BorrowingService {
                 .borrowDate(LocalDate.now())
                 .dueDate(LocalDate.now().plusDays(7))
                 .returnDate(null)
+                .status(Borrowing.Status.BORROWED)
                 .build();
 
         return borrowingRepository.save(newBorrowing);
