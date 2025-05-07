@@ -21,7 +21,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RestController
-@RequestMapping("/books")
+@RequestMapping("/borrowings")
 @RequiredArgsConstructor
 public class BorrowingController {
     private final BorrowingService borrowingService;
