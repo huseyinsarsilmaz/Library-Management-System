@@ -9,7 +9,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class BorrowRequest {
 
-    @RequiredField(entityName = "Borrower", fieldName = "id")
     private Long borrowerId;
 
     @RequiredField(entityName = "Book", fieldName = "id")
