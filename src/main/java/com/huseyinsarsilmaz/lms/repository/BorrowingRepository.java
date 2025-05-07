@@ -4,6 +4,8 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import com.huseyinsarsilmaz.lms.model.entity.Borrowing;
@@ -13,5 +15,8 @@ public interface BorrowingRepository extends JpaRepository<Borrowing, Long> {
     Optional<Borrowing> findByBorrowerIdAndBookId(Long borrowerId, Long bookId);
 
     boolean existsByBorrowerIdAndBookIdAndStatusIn(Long borrowerId, Long bookId, List<Borrowing.Status> statuses);
+
+    @Query("SELECT b FROM Borrowing b JOIN FETCH b.book JOIN FETCH b.borrower WHERE b.id = :id")
+    Optional<Borrowing> findByIdWithBookAndBorrower(@Param("id") Long id);
 
 }
