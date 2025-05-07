@@ -3,6 +3,9 @@ package com.huseyinsarsilmaz.lms.controller;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -11,6 +14,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.huseyinsarsilmaz.lms.model.dto.request.BorrowRequest;
@@ -18,6 +22,7 @@ import com.huseyinsarsilmaz.lms.model.dto.response.ApiResponse;
 import com.huseyinsarsilmaz.lms.model.dto.response.BorrowingDetailed;
 import com.huseyinsarsilmaz.lms.model.dto.response.BorrowingHistory;
 import com.huseyinsarsilmaz.lms.model.dto.response.BorrowingSimple;
+import com.huseyinsarsilmaz.lms.model.dto.response.PagedResponse;
 import com.huseyinsarsilmaz.lms.model.entity.Borrowing;
 import com.huseyinsarsilmaz.lms.model.entity.User;
 import com.huseyinsarsilmaz.lms.service.BorrowingService;
@@ -108,6 +113,26 @@ public class BorrowingController {
         BorrowingHistory borrowingHistory = getBorrowingHistory(borrowings);
 
         return Utils.successResponse(Borrowing.class.getSimpleName() + " history", "acquired", borrowingHistory,
+                HttpStatus.OK);
+    }
+
+    @GetMapping("/report")
+    public ResponseEntity<ApiResponse> getBorrowingReport(
+            @RequestHeader("Authorization") String token,
+            @RequestParam(required = false) Long borrowerId,
+            @PageableDefault(size = 10, sort = "borrower") Pageable pageable) {
+
+        User myUser = userService.getFromToken(token);
+        userService.checkRole(myUser, User.Role.ROLE_LIBRARIAN);
+
+        Page<Borrowing> borrowings = (borrowerId == null)
+                ? borrowingService.getAllOverdue(pageable)
+                : borrowingService.getOverdueByBorrowerId(borrowerId, pageable);
+
+        Page<BorrowingSimple> page = borrowings.map(BorrowingDetailed::new);
+
+        return Utils.successResponse(Borrowing.class.getSimpleName() + " overdue report", "acquired",
+                new PagedResponse<>(page),
                 HttpStatus.OK);
     }
 
