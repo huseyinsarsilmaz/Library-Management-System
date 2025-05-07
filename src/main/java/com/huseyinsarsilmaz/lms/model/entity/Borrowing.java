@@ -44,4 +44,8 @@ public class Borrowing extends LmsEntity {
         RETURNED_TIMELY,
         RETURNED_OVERDUE
     }
+
+    public boolean isReturned() {
+        return status == Status.RETURNED_TIMELY || status == Status.RETURNED_OVERDUE;
+    }
 }
