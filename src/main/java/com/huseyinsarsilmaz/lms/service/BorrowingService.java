@@ -5,5 +5,5 @@ import com.huseyinsarsilmaz.lms.model.entity.Borrowing;
 
 public interface BorrowingService {
 
-    public Borrowing borrow(BorrowRequest req);
+    public Borrowing create(BorrowRequest req);
 }

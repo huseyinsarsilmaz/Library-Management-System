@@ -27,7 +27,7 @@ public class BorrowingServiceImpl implements BorrowingService {
     private static final List<Borrowing.Status> ACTIVE_BORROWING_STATUSES = List
             .of(Borrowing.Status.BORROWED, Borrowing.Status.OVERDUE);
 
-    public Borrowing borrow(BorrowRequest req) {
+    public Borrowing create(BorrowRequest req) {
         boolean alreadyBorrowed = borrowingRepository.existsByBorrowerIdAndBookIdAndStatusIn(
                 req.getBorrowerId(),
                 req.getBookId(),
