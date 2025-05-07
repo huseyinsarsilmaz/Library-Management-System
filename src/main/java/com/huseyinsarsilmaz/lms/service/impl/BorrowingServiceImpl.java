@@ -4,6 +4,8 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.huseyinsarsilmaz.lms.exception.AlreadyBorrowedException;
@@ -99,6 +101,14 @@ public class BorrowingServiceImpl implements BorrowingService {
     public List<Borrowing> getByBorrowerId(long borrowerId) {
         return borrowingRepository.findAllByBorrowerIdWithBook(borrowerId);
 
+    }
+
+    public Page<Borrowing> getOverdueByBorrowerId(long borrowerId, Pageable pageable) {
+        return borrowingRepository.findOverdueByBorrowerId(borrowerId, ACTIVE_BORROWING_STATUSES, pageable);
+    }
+
+    public Page<Borrowing> getAllOverdue(Pageable pageable) {
+        return borrowingRepository.findAllOverdue(ACTIVE_BORROWING_STATUSES, pageable);
     }
 
 }
