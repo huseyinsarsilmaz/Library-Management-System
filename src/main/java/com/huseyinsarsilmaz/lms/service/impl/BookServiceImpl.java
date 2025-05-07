@@ -83,4 +83,13 @@ public class BookServiceImpl implements BookService {
         };
     }
 
+    public Book changeAvailability(Book book, boolean newAvailability) {
+        if (!book.getIsAvailable().equals(newAvailability)) {
+            book.setIsAvailable(newAvailability);
+            book = bookRepository.save(book);
+        }
+
+        return book;
+    }
+
 }
