@@ -44,6 +44,9 @@ public class BorrowingServiceImpl implements BorrowingService {
         User borrower = userService.getById(req.getBorrowerId());
         Book book = bookService.getById(req.getBookId());
 
+        bookService.checkAvailability(book);
+        book = bookService.changeAvailability(book, false);
+
         Borrowing newBorrowing = Borrowing.builder()
                 .borrower(borrower)
                 .book(book)
@@ -79,6 +82,7 @@ public class BorrowingServiceImpl implements BorrowingService {
     }
 
     public Borrowing returnBorrowing(Borrowing borrowing) {
+
         LocalDate now = LocalDate.now();
         borrowing.setReturnDate(now);
 
@@ -88,6 +92,7 @@ public class BorrowingServiceImpl implements BorrowingService {
             borrowing.setStatus(Borrowing.Status.RETURNED_TIMELY);
         }
 
+        bookService.changeAvailability(borrowing.getBook(), true);
         return borrowingRepository.save(borrowing);
     }
 

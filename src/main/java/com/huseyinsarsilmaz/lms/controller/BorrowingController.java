@@ -61,7 +61,7 @@ public class BorrowingController {
 
         borrowing = borrowingService.returnBorrowing(borrowing);
 
-        return Utils.successResponse(Borrowing.class.getSimpleName(), "created", new BorrowingDetailed(borrowing),
+        return Utils.successResponse(Borrowing.class.getSimpleName(), "returned", new BorrowingDetailed(borrowing),
                 HttpStatus.OK);
     }
 
