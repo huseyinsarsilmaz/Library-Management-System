@@ -19,5 +19,5 @@ public interface BookService {
 
     public void delete(Book book);
 
-    public Page<Book> searchBooks(Book.SearchType searchType, String query, Pageable pageable)
+    public Page<Book> searchBooks(Book.SearchType searchType, String query, Pageable pageable);
 }
