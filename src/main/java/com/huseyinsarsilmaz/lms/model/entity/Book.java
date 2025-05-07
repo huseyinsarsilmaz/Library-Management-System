@@ -34,6 +34,9 @@ public class Book extends LmsEntity {
     @Enumerated(EnumType.STRING)
     private Genre genre;
 
+    @Builder.Default
+    private Boolean isAvailable = true;
+
     public enum Genre {
         FICTION,
         DRAMA,
