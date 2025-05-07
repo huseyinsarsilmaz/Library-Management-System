@@ -31,8 +31,4 @@ public class BorrowRequest {
     @Future(message = "{fail.date.future}")
     private LocalDate dueDate;
 
-    @RequiredField(entityName = "Due", fieldName = "date")
-    @Future(message = "{fail.date.future}")
-    private LocalDate returnDate;
-
 }
