@@ -51,7 +51,7 @@ public class BookController {
         Book newBook = bookService.create(req);
 
         return Utils.successResponse(Book.class.getSimpleName(), "created", new BookSimple(newBook),
-                HttpStatus.OK);
+                HttpStatus.CREATED);
     }
 
     @GetMapping("/{id}")
