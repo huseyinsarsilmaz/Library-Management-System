@@ -2,10 +2,12 @@ package com.huseyinsarsilmaz.lms.service.impl;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 
 import com.huseyinsarsilmaz.lms.exception.AlreadyBorrowedException;
+import com.huseyinsarsilmaz.lms.exception.NotFoundException;
 import com.huseyinsarsilmaz.lms.model.dto.request.BorrowRequest;
 import com.huseyinsarsilmaz.lms.model.entity.Book;
 import com.huseyinsarsilmaz.lms.model.entity.Borrowing;
@@ -51,6 +53,15 @@ public class BorrowingServiceImpl implements BorrowingService {
 
         return borrowingRepository.save(newBorrowing);
 
+    }
+
+    public Borrowing getById(long id) {
+        Optional<Borrowing> optBorrowing = borrowingRepository.findByIdWithBookAndBorrower(id);
+        if (optBorrowing.isEmpty()) {
+            throw new NotFoundException(Borrowing.class.getSimpleName(), "id");
+        }
+
+        return optBorrowing.get();
     }
 
 }
