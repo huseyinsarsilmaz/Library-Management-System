@@ -3,6 +3,8 @@ package com.huseyinsarsilmaz.lms.repository;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.boot.autoconfigure.data.web.SpringDataWebProperties.Pageable;
+import org.springframework.data.domain.Page;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -22,4 +24,12 @@ public interface BorrowingRepository extends JpaRepository<Borrowing, Long> {
     @Query("SELECT b FROM Borrowing b JOIN FETCH b.book WHERE b.borrower.id = :borrowerId")
     List<Borrowing> findAllByBorrowerIdWithBook(@Param("borrowerId") Long borrowerId);
 
+    @Query("SELECT b FROM Borrowing b JOIN FETCH b.book WHERE b.borrower.id = :borrowerId AND b.status IN (:statuses)")
+    Page<Borrowing> findOverdueByBorrowerId(@Param("borrowerId") Long borrowerId,
+            @Param("statuses") List<Borrowing.Status> statuses,
+            Pageable pageable);
+
+    @Query("SELECT b FROM Borrowing b JOIN FETCH b.book JOIN FETCH b.borrower WHERE b.status IN (:statuses)")
+    Page<Borrowing> findAllOverdue(@Param("statuses") List<Borrowing.Status> statuses,
+            Pageable pageable);
 }
