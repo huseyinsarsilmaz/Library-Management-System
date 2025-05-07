@@ -9,4 +9,6 @@ public interface BorrowingService {
     public Borrowing create(BorrowRequest req);
 
     public Borrowing getById(long id);
+
+    public void checkOwnership(User user, Borrowing borrowing);
 }

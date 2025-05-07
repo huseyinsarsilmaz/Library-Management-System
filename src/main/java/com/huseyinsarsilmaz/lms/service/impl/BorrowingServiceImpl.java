@@ -7,6 +7,7 @@ import java.util.Optional;
 import org.springframework.stereotype.Service;
 
 import com.huseyinsarsilmaz.lms.exception.AlreadyBorrowedException;
+import com.huseyinsarsilmaz.lms.exception.ForbiddenException;
 import com.huseyinsarsilmaz.lms.exception.NotFoundException;
 import com.huseyinsarsilmaz.lms.model.dto.request.BorrowRequest;
 import com.huseyinsarsilmaz.lms.model.entity.Book;
@@ -62,6 +63,12 @@ public class BorrowingServiceImpl implements BorrowingService {
         }
 
         return optBorrowing.get();
+    }
+
+    public void checkOwnership(User user, Borrowing borrowing) {
+        if (user.getId() != borrowing.getBorrower().getId()) {
+            throw new ForbiddenException();
+        }
     }
 
 }
