@@ -34,4 +34,6 @@ public interface BorrowingService {
 
     public void excuseReturnedOverdueBorrowings(User user);
 
+    public Borrowing excuseBorrowing(Borrowing borrowing);
+
 }

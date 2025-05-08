@@ -147,4 +147,10 @@ public class BorrowingServiceImpl implements BorrowingService {
         borrowingRepository.saveAll(overdueBorrowings);
     }
 
+    public Borrowing excuseBorrowing(Borrowing borrowing) {
+        borrowing.setStatus(Status.RETURNED_EXCUSED);
+
+        return borrowingRepository.save(borrowing);
+    }
+
 }
