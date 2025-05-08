@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 
 import com.huseyinsarsilmaz.lms.exception.AlreadyBorrowedException;
 import com.huseyinsarsilmaz.lms.exception.AlreadyReturnedBorrowingException;
+import com.huseyinsarsilmaz.lms.exception.BorrowingNotExcusableException;
 import com.huseyinsarsilmaz.lms.exception.ForbiddenException;
 import com.huseyinsarsilmaz.lms.exception.HasActiveBorrowingsException;
 import com.huseyinsarsilmaz.lms.exception.NotFoundException;
@@ -151,6 +152,12 @@ public class BorrowingServiceImpl implements BorrowingService {
         borrowing.setStatus(Status.RETURNED_EXCUSED);
 
         return borrowingRepository.save(borrowing);
+    }
+
+    public void checkExcusable(Borrowing borrowing) {
+        if (borrowing.getStatus() != Status.RETURNED_OVERDUE) {
+            throw new BorrowingNotExcusableException();
+        }
     }
 
 }

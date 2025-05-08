@@ -36,4 +36,6 @@ public interface BorrowingService {
 
     public Borrowing excuseBorrowing(Borrowing borrowing);
 
+    public void checkExcusable(Borrowing borrowing);
+
 }
