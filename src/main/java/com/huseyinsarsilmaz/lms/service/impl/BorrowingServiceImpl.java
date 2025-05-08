@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import com.huseyinsarsilmaz.lms.exception.AlreadyBorrowedException;
 import com.huseyinsarsilmaz.lms.exception.AlreadyReturnedBorrowingException;
 import com.huseyinsarsilmaz.lms.exception.ForbiddenException;
+import com.huseyinsarsilmaz.lms.exception.HasActiveBorrowingsException;
 import com.huseyinsarsilmaz.lms.exception.NotFoundException;
 import com.huseyinsarsilmaz.lms.exception.OverdueException;
 import com.huseyinsarsilmaz.lms.model.dto.request.BorrowRequest;
@@ -112,9 +113,10 @@ public class BorrowingServiceImpl implements BorrowingService {
 
     }
 
-    public long getActiveBorrowingCountByBorrowerId(long borrowerId) {
-        return borrowingRepository.countByBorrowerIdAndStatusIn(borrowerId, ACTIVE_BORROWING_STATUSES);
-
+    public void checkUserHasActiveBorrowings(User user) {
+        if (borrowingRepository.countByBorrowerIdAndStatusIn(user.getId(), ACTIVE_BORROWING_STATUSES) > 0) {
+            throw new HasActiveBorrowingsException();
+        }
     }
 
     public Page<Borrowing> getOverdueByBorrowerId(long borrowerId, Pageable pageable) {
