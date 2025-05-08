@@ -113,6 +113,8 @@ public class BorrowingServiceImpl implements BorrowingService {
     }
 
     public void checkBorrowableByBorrowerId(Long borrowerId) {
+        userService.checkActiveById(borrowerId);
+
         if (borrowingRepository.existsByBorrowerIdAndStatus(borrowerId, Borrowing.Status.OVERDUE)) {
             throw new OverdueException();
         }
