@@ -95,6 +95,14 @@ public class BorrowingServiceImpl implements BorrowingService {
             borrowing.setStatus(Borrowing.Status.RETURNED_TIMELY);
         }
 
+        if (borrowing.getStatus() == Borrowing.Status.RETURNED_OVERDUE) {
+            long overdueCount = borrowingRepository.countByBorrowerIdAndStatus(borrowing.getBorrower().getId(),
+                    Borrowing.Status.OVERDUE);
+            if (overdueCount >= 2) {
+                userService.changeActive(borrowing.getBorrower(), false);
+            }
+        }
+
         bookService.changeAvailability(borrowing.getBook(), true);
         return borrowingRepository.save(borrowing);
     }
