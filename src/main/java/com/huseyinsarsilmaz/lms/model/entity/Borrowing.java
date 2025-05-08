@@ -42,7 +42,8 @@ public class Borrowing extends LmsEntity {
         BORROWED,
         OVERDUE,
         RETURNED_TIMELY,
-        RETURNED_OVERDUE
+        RETURNED_OVERDUE,
+        RETURNED_EXCUSED
     }
 
     public boolean isReturned() {
