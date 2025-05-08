@@ -138,4 +138,21 @@ public class BorrowingController {
                 HttpStatus.OK);
     }
 
+    @PostMapping("/excuse/id")
+    public ResponseEntity<ApiResponse> excuseBorrowing(
+            @RequestHeader("Authorization") String token,
+            @PathVariable("id") long id) {
+
+        User myUser = userService.getFromToken(token);
+        userService.checkRole(myUser, User.Role.ROLE_LIBRARIAN);
+
+        Borrowing borrowing = borrowingService.getById(id);
+        borrowingService.checkExcusable(borrowing);
+
+        borrowing = borrowingService.excuseBorrowing(borrowing);
+
+        return Utils.successResponse(Borrowing.class.getSimpleName(), "created", new BorrowingDetailed(borrowing),
+                HttpStatus.CREATED);
+    }
+
 }
