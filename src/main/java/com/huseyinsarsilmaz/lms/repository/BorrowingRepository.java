@@ -1,5 +1,6 @@
 package com.huseyinsarsilmaz.lms.repository;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -25,6 +26,9 @@ public interface BorrowingRepository extends JpaRepository<Borrowing, Long> {
     long countByBorrowerIdAndStatusIn(Long borrowerId, List<Borrowing.Status> statuses);
 
     List<Borrowing> findByBorrowerIdAndStatus(Long borrowerId, Borrowing.Status status);
+
+    @Query("SELECT b FROM Borrowing b WHERE b.status = :status AND b.dueDate < :today")
+    List<Borrowing> findPastDueByStatus(@Param("status") Borrowing.Status status, @Param("today") LocalDate today);
 
     @Query("SELECT b FROM Borrowing b JOIN FETCH b.book JOIN FETCH b.borrower WHERE b.id = :id")
     Optional<Borrowing> findByIdWithBookAndBorrower(@Param("id") Long id);
