@@ -16,8 +16,10 @@ import com.huseyinsarsilmaz.lms.model.dto.request.PromoteRequest;
 import com.huseyinsarsilmaz.lms.model.dto.request.UserUpdateRequest;
 import com.huseyinsarsilmaz.lms.model.dto.response.ApiResponse;
 import com.huseyinsarsilmaz.lms.model.dto.response.PromoteResponse;
+import com.huseyinsarsilmaz.lms.model.dto.response.UserDetailed;
 import com.huseyinsarsilmaz.lms.model.dto.response.UserSimple;
 import com.huseyinsarsilmaz.lms.model.entity.User;
+import com.huseyinsarsilmaz.lms.service.BorrowingService;
 import com.huseyinsarsilmaz.lms.service.UserService;
 import com.huseyinsarsilmaz.lms.service.Utils;
 
@@ -29,6 +31,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class UserController {
     private final UserService userService;
+    private final BorrowingService borrowingService;
 
     private User authorizeModifyAccessToUser(String token, long targetUserId, User.Role baseRole) {
         User myUser = userService.getFromToken(token);
@@ -147,5 +150,23 @@ public class UserController {
         userService.delete(targetUser);
 
         return Utils.successResponse("User", "acquired", new UserSimple(targetUser), HttpStatus.OK);
+    }
+
+    @PostMapping("/{id}/reactivate")
+    public ResponseEntity<ApiResponse> excuseBorrowing(
+            @RequestHeader("Authorization") String token,
+            @PathVariable("id") long id) {
+
+        User myUser = userService.getFromToken(token);
+        userService.checkRole(myUser, User.Role.ROLE_LIBRARIAN);
+
+        User reactivatedUser = userService.getById(id);
+        userService.checkDeactivated(reactivatedUser);
+
+        reactivatedUser = userService.changeActive(reactivatedUser, true);
+        borrowingService.excuseReturnedOverdueBorrowings(reactivatedUser);
+
+        return Utils.successResponse(User.class.getSimpleName(), "re-activated", new UserDetailed(reactivatedUser),
+                HttpStatus.OK);
     }
 }
