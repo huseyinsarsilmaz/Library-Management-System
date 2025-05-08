@@ -112,6 +112,11 @@ public class BorrowingServiceImpl implements BorrowingService {
 
     }
 
+    public long getActiveBorrowingCountByBorrowerId(long borrowerId) {
+        return borrowingRepository.countByBorrowerIdAndStatusIn(borrowerId, ACTIVE_BORROWING_STATUSES);
+
+    }
+
     public Page<Borrowing> getOverdueByBorrowerId(long borrowerId, Pageable pageable) {
         return borrowingRepository.findOverdueByBorrowerId(borrowerId, ACTIVE_BORROWING_STATUSES, pageable);
     }

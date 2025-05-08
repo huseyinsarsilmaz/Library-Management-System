@@ -30,4 +30,6 @@ public interface BorrowingService {
 
     public void checkBorrowableByBorrowerId(Long borrowerId);
 
+    public long getActiveBorrowingCountByBorrowerId(long borrowerId);
+
 }
