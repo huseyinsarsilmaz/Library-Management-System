@@ -52,9 +52,11 @@ public class BorrowingController {
             req.setBorrowerId(myUser.getId());
         }
 
-        Borrowing newBorring = borrowingService.create(req);
+        borrowingService.checkBorrowableByBorrowerId(req.getBorrowerId());
 
-        return Utils.successResponse(Borrowing.class.getSimpleName(), "created", new BorrowingSimple(newBorring),
+        Borrowing newBorrowing = borrowingService.create(req);
+
+        return Utils.successResponse(Borrowing.class.getSimpleName(), "created", new BorrowingSimple(newBorrowing),
                 HttpStatus.CREATED);
     }
 
