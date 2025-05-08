@@ -28,4 +28,6 @@ public interface BorrowingService {
 
     public Page<Borrowing> getAllOverdue(Pageable pageable);
 
+    public void checkBorrowableByBorrowerId(Long borrowerId);
+
 }

@@ -12,6 +12,7 @@ import com.huseyinsarsilmaz.lms.exception.AlreadyBorrowedException;
 import com.huseyinsarsilmaz.lms.exception.AlreadyReturnedBorrowingException;
 import com.huseyinsarsilmaz.lms.exception.ForbiddenException;
 import com.huseyinsarsilmaz.lms.exception.NotFoundException;
+import com.huseyinsarsilmaz.lms.exception.OverdueException;
 import com.huseyinsarsilmaz.lms.model.dto.request.BorrowRequest;
 import com.huseyinsarsilmaz.lms.model.entity.Book;
 import com.huseyinsarsilmaz.lms.model.entity.Borrowing;
@@ -109,6 +110,12 @@ public class BorrowingServiceImpl implements BorrowingService {
 
     public Page<Borrowing> getAllOverdue(Pageable pageable) {
         return borrowingRepository.findAllOverdue(ACTIVE_BORROWING_STATUSES, pageable);
+    }
+
+    public void checkBorrowableByBorrowerId(Long borrowerId) {
+        if (borrowingRepository.existsByBorrowerIdAndStatus(borrowerId, Borrowing.Status.OVERDUE)) {
+            throw new OverdueException();
+        }
     }
 
 }
