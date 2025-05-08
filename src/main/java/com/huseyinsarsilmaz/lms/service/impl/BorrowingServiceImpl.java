@@ -18,6 +18,7 @@ import com.huseyinsarsilmaz.lms.model.dto.request.BorrowRequest;
 import com.huseyinsarsilmaz.lms.model.entity.Book;
 import com.huseyinsarsilmaz.lms.model.entity.Borrowing;
 import com.huseyinsarsilmaz.lms.model.entity.User;
+import com.huseyinsarsilmaz.lms.model.entity.Borrowing.Status;
 import com.huseyinsarsilmaz.lms.repository.BorrowingRepository;
 import com.huseyinsarsilmaz.lms.service.BookService;
 import com.huseyinsarsilmaz.lms.service.BorrowingService;
@@ -133,6 +134,17 @@ public class BorrowingServiceImpl implements BorrowingService {
         if (borrowingRepository.existsByBorrowerIdAndStatus(borrowerId, Borrowing.Status.OVERDUE)) {
             throw new OverdueException();
         }
+    }
+
+    public void excuseReturnedOverdueBorrowings(User user) {
+        List<Borrowing> overdueBorrowings = borrowingRepository.findByBorrowerIdAndStatus(user.getId(),
+                Status.RETURNED_OVERDUE);
+
+        for (Borrowing borrowing : overdueBorrowings) {
+            borrowing.setStatus(Borrowing.Status.RETURNED_EXCUSED);
+        }
+
+        borrowingRepository.saveAll(overdueBorrowings);
     }
 
 }

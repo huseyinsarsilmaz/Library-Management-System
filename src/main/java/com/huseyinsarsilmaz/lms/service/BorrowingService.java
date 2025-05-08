@@ -32,4 +32,6 @@ public interface BorrowingService {
 
     public void checkUserHasActiveBorrowings(User user);
 
+    public void excuseReturnedOverdueBorrowings(User user);
+
 }
