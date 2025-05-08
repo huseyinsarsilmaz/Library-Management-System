@@ -22,6 +22,8 @@ public interface BorrowingRepository extends JpaRepository<Borrowing, Long> {
 
     long countByBorrowerIdAndStatus(Long borrowerId, Borrowing.Status status);
 
+    long countByBorrowerIdAndStatusIn(Long borrowerId, List<Borrowing.Status> statuses);
+
     @Query("SELECT b FROM Borrowing b JOIN FETCH b.book JOIN FETCH b.borrower WHERE b.id = :id")
     Optional<Borrowing> findByIdWithBookAndBorrower(@Param("id") Long id);
 
