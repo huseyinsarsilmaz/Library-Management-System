@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import com.huseyinsarsilmaz.lms.exception.AlreadyExistsException;
 import com.huseyinsarsilmaz.lms.exception.ForbiddenException;
 import com.huseyinsarsilmaz.lms.exception.UserInactiveException;
+import com.huseyinsarsilmaz.lms.exception.UserNotDeactivatedException;
 import com.huseyinsarsilmaz.lms.exception.NotFoundException;
 import com.huseyinsarsilmaz.lms.model.dto.request.RegisterRequest;
 import com.huseyinsarsilmaz.lms.model.dto.request.UserUpdateRequest;
@@ -127,5 +128,11 @@ public class UserServiceImpl implements UserService {
     public User changeActive(User user, boolean newActive) {
         user.setIsActive(newActive);
         return userRepository.save(user);
+    }
+
+    public void checkDeactivated(User user) {
+        if (!userRepository.existsByIdAndIsActiveFalse(user.getId())) {
+            throw new UserNotDeactivatedException();
+        }
     }
 }

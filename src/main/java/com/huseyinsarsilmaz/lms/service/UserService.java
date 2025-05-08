@@ -26,5 +26,7 @@ public interface UserService {
 
     public void checkActiveById(Long userId);
 
+    public void checkDeactivated(User user);
+
     public User changeActive(User user, boolean newActive);
 }
