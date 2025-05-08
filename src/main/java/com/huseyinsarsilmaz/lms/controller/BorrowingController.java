@@ -152,7 +152,7 @@ public class BorrowingController {
         borrowing = borrowingService.excuseBorrowing(borrowing);
 
         return Utils.successResponse(Borrowing.class.getSimpleName(), "created", new BorrowingDetailed(borrowing),
-                HttpStatus.CREATED);
+                HttpStatus.OK);
     }
 
 }
