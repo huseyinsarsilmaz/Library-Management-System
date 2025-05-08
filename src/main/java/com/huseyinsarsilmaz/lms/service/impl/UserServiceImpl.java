@@ -123,4 +123,9 @@ public class UserServiceImpl implements UserService {
             throw new InactiveException();
         }
     }
+
+    public User changeActive(User user, boolean newActive) {
+        user.setIsActive(newActive);
+        return userRepository.save(user);
+    }
 }

@@ -25,4 +25,6 @@ public interface UserService {
     public void delete(User user);
 
     public void checkActiveById(Long userId);
+
+    public User changeActive(User user, boolean newActive);
 }
