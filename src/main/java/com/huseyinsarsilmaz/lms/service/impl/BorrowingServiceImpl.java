@@ -6,6 +6,7 @@ import java.util.Optional;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import com.huseyinsarsilmaz.lms.exception.AlreadyBorrowedException;
@@ -158,6 +159,18 @@ public class BorrowingServiceImpl implements BorrowingService {
         if (borrowing.getStatus() != Status.RETURNED_OVERDUE) {
             throw new BorrowingNotExcusableException();
         }
+    }
+
+    @Scheduled(cron = "0 0 19 * * *")
+    public void markOverdueBorrowings() {
+        List<Borrowing> borrowings = borrowingRepository.findPastDueByStatus(Borrowing.Status.BORROWED,
+                LocalDate.now());
+
+        for (Borrowing borrowing : borrowings) {
+            borrowing.setStatus(Borrowing.Status.OVERDUE);
+        }
+
+        borrowingRepository.saveAll(borrowings);
     }
 
 }
