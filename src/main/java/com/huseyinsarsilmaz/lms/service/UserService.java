@@ -23,4 +23,6 @@ public interface UserService {
     public User update(User user, UserUpdateRequest req);
 
     public void delete(User user);
+
+    public void checkActiveById(Long userId);
 }

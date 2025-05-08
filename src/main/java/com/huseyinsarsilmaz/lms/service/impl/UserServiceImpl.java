@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 
 import com.huseyinsarsilmaz.lms.exception.AlreadyExistsException;
 import com.huseyinsarsilmaz.lms.exception.ForbiddenException;
+import com.huseyinsarsilmaz.lms.exception.InactiveException;
 import com.huseyinsarsilmaz.lms.exception.NotFoundException;
 import com.huseyinsarsilmaz.lms.model.dto.request.RegisterRequest;
 import com.huseyinsarsilmaz.lms.model.dto.request.UserUpdateRequest;
@@ -115,5 +116,11 @@ public class UserServiceImpl implements UserService {
 
     public void delete(User user) {
         userRepository.delete(user);
+    }
+
+    public void checkActiveById(Long userId) {
+        if (userRepository.existsByIdAndIsActiveFalse(userId)) {
+            throw new InactiveException();
+        }
     }
 }
