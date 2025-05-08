@@ -30,4 +30,7 @@ public class User extends LmsEntity {
         ROLE_ADMIN
     }
 
+    @Builder.Default
+    private Boolean isActive = true;
+
 }
