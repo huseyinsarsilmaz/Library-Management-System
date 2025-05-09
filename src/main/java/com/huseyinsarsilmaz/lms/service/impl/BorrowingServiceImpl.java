@@ -123,11 +123,11 @@ public class BorrowingServiceImpl implements BorrowingService {
     }
 
     public Page<Borrowing> getOverdueByBorrowerId(long borrowerId, Pageable pageable) {
-        return borrowingRepository.findOverdueByBorrowerId(borrowerId, ACTIVE_BORROWING_STATUSES, pageable);
+        return borrowingRepository.findAllByBorrowerIdAndStatusNotIn(borrowerId, ACTIVE_BORROWING_STATUSES, pageable);
     }
 
     public Page<Borrowing> getAllOverdue(Pageable pageable) {
-        return borrowingRepository.findAllOverdue(ACTIVE_BORROWING_STATUSES, pageable);
+        return borrowingRepository.findAllByStatusNotIn(ACTIVE_BORROWING_STATUSES, pageable);
     }
 
     public void checkBorrowableByBorrowerId(Long borrowerId) {
