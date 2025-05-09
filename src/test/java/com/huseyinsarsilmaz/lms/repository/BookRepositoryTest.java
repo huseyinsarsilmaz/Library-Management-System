@@ -56,7 +56,7 @@ public class BookRepositoryTest {
 
     @Test
     public void testFindById_whenNotFound() {
-        Optional<Book> result = bookRepository.findById(99L);
+        Optional<Book> result = bookRepository.findById(Long.MAX_VALUE);
         assertFalse(result.isPresent());
     }
 

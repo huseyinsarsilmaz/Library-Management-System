@@ -53,7 +53,7 @@ public class UserRepositoryTest {
 
     @Test
     public void testFindById_whenUserNotFound() {
-        Optional<User> optUser = userRepository.findById(999L);
+        Optional<User> optUser = userRepository.findById(Long.MAX_VALUE);
 
         assertFalse(optUser.isPresent());
     }
@@ -84,7 +84,7 @@ public class UserRepositoryTest {
         Long idToCheck = switch (idType) {
             case "active" -> activeUser.getId();
             case "inactive" -> inactiveUser.getId();
-            default -> 999L;
+            default -> Long.MAX_VALUE;
         };
 
         boolean exists = userRepository.existsByIdAndIsActiveFalse(idToCheck);
