@@ -3,12 +3,14 @@ package com.huseyinsarsilmaz.lms.model.dto.response;
 import com.huseyinsarsilmaz.lms.model.entity.User;
 
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
+@NoArgsConstructor
 public class RegisterResponse {
-    private final String email;
-    private final String name;
-    private final String surname;
+    private String email;
+    private String name;
+    private String surname;
 
     public RegisterResponse(User user) {
         this.email = user.getEmail();

@@ -67,7 +67,7 @@ public class UserController {
     }
 
     @PostMapping("/promote")
-    public ResponseEntity<ApiResponse> promote(
+    public ResponseEntity<ApiResponse<PromoteResponse>> promote(
             @RequestHeader("Authorization") String token,
             @Valid @RequestBody PromoteRequest req) {
 
@@ -81,7 +81,7 @@ public class UserController {
     }
 
     @GetMapping("/me")
-    public ResponseEntity<ApiResponse> getMyUser(@RequestHeader("Authorization") String token) {
+    public ResponseEntity<ApiResponse<UserSimple>> getMyUser(@RequestHeader("Authorization") String token) {
 
         User myUser = userService.getFromToken(token);
 
@@ -89,7 +89,7 @@ public class UserController {
     }
 
     @PutMapping("/me")
-    public ResponseEntity<ApiResponse> updateMyUser(
+    public ResponseEntity<ApiResponse<UserSimple>> updateMyUser(
             @RequestHeader("Authorization") String token,
             @Valid @RequestBody UserUpdateRequest req) {
 
@@ -104,7 +104,7 @@ public class UserController {
     }
 
     @DeleteMapping("/me")
-    public ResponseEntity<ApiResponse> deleteMyUser(@RequestHeader("Authorization") String token) {
+    public ResponseEntity<ApiResponse<UserSimple>> deleteMyUser(@RequestHeader("Authorization") String token) {
 
         User myUser = userService.getFromToken(token);
 
@@ -114,7 +114,7 @@ public class UserController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ApiResponse> getUser(
+    public ResponseEntity<ApiResponse<UserSimple>> getUser(
             @RequestHeader("Authorization") String token,
             @PathVariable("id") long id) {
 
@@ -124,7 +124,7 @@ public class UserController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<ApiResponse> updateUser(
+    public ResponseEntity<ApiResponse<UserSimple>> updateUser(
             @RequestHeader("Authorization") String token,
             @Valid @RequestBody UserUpdateRequest req,
             @PathVariable("id") long id) {
@@ -141,7 +141,7 @@ public class UserController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<ApiResponse> deleteUser(
+    public ResponseEntity<ApiResponse<UserSimple>> deleteUser(
             @RequestHeader("Authorization") String token,
             @PathVariable("id") long id) {
 
@@ -153,7 +153,7 @@ public class UserController {
     }
 
     @PostMapping("/{id}/reactivate")
-    public ResponseEntity<ApiResponse> excuseBorrowing(
+    public ResponseEntity<ApiResponse<UserDetailed>> excuseBorrowing(
             @RequestHeader("Authorization") String token,
             @PathVariable("id") long id) {
 

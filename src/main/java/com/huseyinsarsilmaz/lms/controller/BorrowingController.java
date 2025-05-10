@@ -40,7 +40,7 @@ public class BorrowingController {
     private final UserService userService;
 
     @PostMapping
-    public ResponseEntity<ApiResponse> createBorrowing(
+    public ResponseEntity<ApiResponse<BorrowingSimple>> createBorrowing(
             @RequestHeader("Authorization") String token,
             @Valid @RequestBody BorrowRequest req) {
 
@@ -61,7 +61,7 @@ public class BorrowingController {
     }
 
     @PostMapping("/{id}/return")
-    public ResponseEntity<ApiResponse> returnBorrowing(
+    public ResponseEntity<ApiResponse<BorrowingDetailed>> returnBorrowing(
             @RequestHeader("Authorization") String token,
             @PathVariable("id") long id) {
 
@@ -93,7 +93,8 @@ public class BorrowingController {
     }
 
     @GetMapping("/my")
-    public ResponseEntity<ApiResponse> getMyBorrowingHistory(@RequestHeader("Authorization") String token) {
+    public ResponseEntity<ApiResponse<BorrowingHistory>> getMyBorrowingHistory(
+            @RequestHeader("Authorization") String token) {
 
         User myUser = userService.getFromToken(token);
         List<Borrowing> borrowings = borrowingService.getByBorrowerId(myUser.getId());
@@ -104,7 +105,7 @@ public class BorrowingController {
     }
 
     @GetMapping("/user/{id}")
-    public ResponseEntity<ApiResponse> getBorrowingHistory(
+    public ResponseEntity<ApiResponse<BorrowingHistory>> getBorrowingHistory(
             @RequestHeader("Authorization") String token,
             @PathVariable("id") long id) {
 
@@ -119,7 +120,7 @@ public class BorrowingController {
     }
 
     @GetMapping("/report")
-    public ResponseEntity<ApiResponse> getBorrowingReport(
+    public ResponseEntity<ApiResponse<PagedResponse<BorrowingSimple>>> getBorrowingReport(
             @RequestHeader("Authorization") String token,
             @RequestParam(required = false) Long borrowerId,
             @PageableDefault(size = 10, sort = "borrower") Pageable pageable) {
@@ -139,7 +140,7 @@ public class BorrowingController {
     }
 
     @PostMapping("/excuse/id")
-    public ResponseEntity<ApiResponse> excuseBorrowing(
+    public ResponseEntity<ApiResponse<BorrowingDetailed>> excuseBorrowing(
             @RequestHeader("Authorization") String token,
             @PathVariable("id") long id) {
 

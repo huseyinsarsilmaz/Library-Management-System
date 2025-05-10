@@ -35,7 +35,7 @@ public class SecurityConfig {
 
     private void handleExceptionInFilterChain(HttpServletRequest request, HttpServletResponse response,
             RuntimeException exception, int responseCode) throws IOException {
-        ApiResponse apiResponse = new ApiResponse(false,
+            ApiResponse<String> apiResponse = new ApiResponse<>(false,
                 "Unauthorized: " + exception.getMessage(), null);
         response.setStatus(responseCode);
         response.setContentType("application/json");

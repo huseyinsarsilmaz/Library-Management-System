@@ -20,17 +20,18 @@ public class Utils {
         Utils.messageSource = messageSource;
     }
 
-    public static ResponseEntity<ApiResponse> successResponse(String entity, String action, Object data,
+    public static <T> ResponseEntity<ApiResponse<T>> successResponse(String entity, String action, T data,
             HttpStatus status) {
         String message = messageSource.getMessage("success.message", new Object[] { entity, action },
                 Locale.getDefault());
-        ApiResponse response = new ApiResponse(true, message, data);
+        ApiResponse<T> response = new ApiResponse<>(true, message, data);
         return new ResponseEntity<>(response, status);
     }
 
-    public static ResponseEntity<ApiResponse> failResponse(String type, String[] args, Object data, HttpStatus status) {
+    public static <T> ResponseEntity<ApiResponse<T>> failResponse(String type, String[] args, T data,
+            HttpStatus status) {
         String message = messageSource.getMessage("fail." + type, args, Locale.getDefault());
-        ApiResponse response = new ApiResponse(false, message, data);
+        ApiResponse<T> response = new ApiResponse<>(false, message, data);
         return new ResponseEntity<>(response, status);
     }
 

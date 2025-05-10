@@ -5,17 +5,19 @@ import java.time.LocalDate;
 import com.huseyinsarsilmaz.lms.model.entity.Book;
 
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
+@NoArgsConstructor
 public class BookSimple {
 
-    private final long id;
-    private final String title;
-    private final String author;
-    private final String description;
-    private final String isbn;
-    private final LocalDate publicationDate;
-    private final Book.Genre genre;
+    private long id;
+    private String title;
+    private String author;
+    private String description;
+    private String isbn;
+    private LocalDate publicationDate;
+    private Book.Genre genre;
 
     public BookSimple(Book book) {
         this.id = book.getId();

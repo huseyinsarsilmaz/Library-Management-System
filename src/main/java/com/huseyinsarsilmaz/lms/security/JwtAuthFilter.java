@@ -63,7 +63,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     }
 
     private void handleException(HttpServletResponse response, Exception ex) throws IOException {
-        ApiResponse apiResponse = new ApiResponse(false, "Unauthorized: " + ex.getMessage(), null);
+        ApiResponse<String> apiResponse = new ApiResponse<>(false, "Unauthorized: " + ex.getMessage(), null);
 
         response.setStatus(HttpStatus.UNAUTHORIZED.value());
         response.setContentType("application/json");

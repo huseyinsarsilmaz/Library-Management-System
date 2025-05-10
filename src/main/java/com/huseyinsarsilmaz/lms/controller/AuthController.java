@@ -38,7 +38,7 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<ApiResponse> register(@Valid @RequestBody RegisterRequest req) {
+    public ResponseEntity<ApiResponse<RegisterResponse>> register(@Valid @RequestBody RegisterRequest req) {
         userService.isEmailTaken(req.getEmail());
 
         User newUser = userService.register(req);
@@ -47,7 +47,7 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<ApiResponse> login(@Valid @RequestBody LoginRequest req) {
+    public ResponseEntity<ApiResponse<LoginResponse>> login(@Valid @RequestBody LoginRequest req) {
         String token = getJwtToken(req);
 
         return Utils.successResponse(User.class.getSimpleName(), "logged in", new LoginResponse(token), HttpStatus.OK);

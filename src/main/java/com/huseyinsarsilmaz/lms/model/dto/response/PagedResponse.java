@@ -5,8 +5,10 @@ import java.util.List;
 import org.springframework.data.domain.Page;
 
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
+@NoArgsConstructor
 public class PagedResponse<T> {
     private List<T> items;
 

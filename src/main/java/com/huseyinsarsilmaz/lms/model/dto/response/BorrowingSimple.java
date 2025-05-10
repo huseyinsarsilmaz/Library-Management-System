@@ -5,16 +5,18 @@ import java.time.LocalDate;
 import com.huseyinsarsilmaz.lms.model.entity.Borrowing;
 
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
+@NoArgsConstructor
 public class BorrowingSimple {
 
-    private final long id;
-    private final UserSimple borrower;
-    private final BookSimple book;
-    private final LocalDate borrowDate;
-    private final LocalDate dueDate;
-    private final Borrowing.Status status;
+    private long id;
+    private UserSimple borrower;
+    private BookSimple book;
+    private LocalDate borrowDate;
+    private LocalDate dueDate;
+    private Borrowing.Status status;
 
     public BorrowingSimple(Borrowing borrowing) {
         this.id = borrowing.getId();

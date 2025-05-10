@@ -39,7 +39,7 @@ public class BookController {
     private final UserService userService;
 
     @PostMapping
-    public ResponseEntity<ApiResponse> createBook(
+    public ResponseEntity<ApiResponse<BookSimple>> createBook(
             @RequestHeader("Authorization") String token,
             @Valid @RequestBody BookCreateRequest req) {
 
@@ -55,7 +55,7 @@ public class BookController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ApiResponse> getBook(@PathVariable("id") long id) {
+    public ResponseEntity<ApiResponse<BookSimple>> getBook(@PathVariable("id") long id) {
 
         Book book = bookService.getById(id);
 
@@ -63,7 +63,7 @@ public class BookController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<ApiResponse> updateBook(
+    public ResponseEntity<ApiResponse<BookSimple>> updateBook(
             @RequestHeader("Authorization") String token,
             @Valid @RequestBody BookUpdateRequest req,
             @PathVariable("id") long id) {
@@ -83,7 +83,7 @@ public class BookController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<ApiResponse> deleteBook(
+    public ResponseEntity<ApiResponse<BookSimple>> deleteBook(
             @RequestHeader("Authorization") String token,
             @PathVariable("id") long id) {
 
@@ -97,7 +97,7 @@ public class BookController {
     }
 
     @GetMapping("/search")
-    public ResponseEntity<ApiResponse> searchBooks(
+    public ResponseEntity<ApiResponse<PagedResponse<BookSimple>>> searchBooks(
             @RequestParam Book.SearchType type,
             @RequestParam String query,
             @PageableDefault(size = 10, sort = "title") Pageable pageable) {
