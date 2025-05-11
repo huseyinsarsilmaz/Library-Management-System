@@ -17,20 +17,25 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 import com.huseyinsarsilmaz.lms.model.dto.response.ApiResponse;
-import com.huseyinsarsilmaz.lms.service.Utils;
+import com.huseyinsarsilmaz.lms.util.ResponseBuilder;
+
+import lombok.RequiredArgsConstructor;
 
 @RestControllerAdvice
+@RequiredArgsConstructor
 public class GlobalExceptionHandler {
+
+    private final ResponseBuilder responseBuilder;
 
     @ExceptionHandler(LmsException.class)
     public ResponseEntity<ApiResponse<String>> handleLmsException(LmsException ex) {
-        return Utils.failResponse(ex.getType(), ex.getArgs(), ex.getMessage(), ex.getHttpStatus());
+        return responseBuilder.fail(ex.getType(), ex.getArgs(), ex.getMessage(), ex.getHttpStatus());
     }
 
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<ApiResponse<String>> handleHttpMessageNotReadableException(
             HttpMessageNotReadableException ex) {
-        return Utils.failResponse("invalid", new String[] { "Request" }, ex.getMessage(), HttpStatus.BAD_REQUEST);
+        return responseBuilder.fail("invalid", new String[] { "Request" }, ex.getMessage(), HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
@@ -43,12 +48,12 @@ public class GlobalExceptionHandler {
             errors.put(fieldName, errorMessage);
         });
 
-        return Utils.failResponse("invalid", new String[] { "Request" }, errors, HttpStatus.BAD_REQUEST);
+        return responseBuilder.fail("invalid", new String[] { "Request" }, errors, HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(BadCredentialsException.class)
     public ResponseEntity<ApiResponse<String>> handleBadCredentialsException(BadCredentialsException ex) {
-        return Utils.failResponse("failed", new String[] { "User login" }, ex.getMessage(), HttpStatus.UNAUTHORIZED);
+        return responseBuilder.fail("failed", new String[] { "User login" }, ex.getMessage(), HttpStatus.UNAUTHORIZED);
 
     }
 
@@ -76,7 +81,7 @@ public class GlobalExceptionHandler {
             }
         }
 
-        return Utils.failResponse("invalid.type", new String[] { name, type, value, validValueList }, ex.getMessage(),
+        return responseBuilder.fail("invalid.type", new String[] { name, type, value, validValueList }, ex.getMessage(),
                 HttpStatus.BAD_REQUEST);
     }
 
@@ -85,15 +90,15 @@ public class GlobalExceptionHandler {
             InternalAuthenticationServiceException ex) {
         if (ex.getCause() instanceof NotFoundException) {
             // This case only occurs when the user enters a non-existent email in login
-            return Utils.failResponse("not.found", new String[] { "User", "email" }, ex.getMessage(),
+            return responseBuilder.fail("not.found", new String[] { "User", "email" }, ex.getMessage(),
                     HttpStatus.NOT_FOUND);
 
         }
-        return Utils.failResponse("general", new String[] {}, ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        return responseBuilder.fail("general", new String[] {}, ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiResponse<String>> handleGeneralException(Exception ex) {
-        return Utils.failResponse("general", new String[] {}, ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        return responseBuilder.fail("general", new String[] {}, ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
     }
 }

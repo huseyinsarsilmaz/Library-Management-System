@@ -21,7 +21,7 @@ import com.huseyinsarsilmaz.lms.model.dto.response.UserSimple;
 import com.huseyinsarsilmaz.lms.model.entity.User;
 import com.huseyinsarsilmaz.lms.service.BorrowingService;
 import com.huseyinsarsilmaz.lms.service.UserService;
-import com.huseyinsarsilmaz.lms.service.Utils;
+import com.huseyinsarsilmaz.lms.util.ResponseBuilder;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -32,6 +32,7 @@ import lombok.RequiredArgsConstructor;
 public class UserController {
     private final UserService userService;
     private final BorrowingService borrowingService;
+    private final ResponseBuilder responseBuilder;
 
     private User authorizeModifyAccessToUser(String token, long targetUserId, User.Role baseRole) {
         User myUser = userService.getFromToken(token);
@@ -76,7 +77,7 @@ public class UserController {
 
         User promotedUser = userService.getByEmail(req.getEmail());
         promotedUser = userService.promote(promotedUser, req.getNewRole());
-        return Utils.successResponse(User.class.getSimpleName(), "promoted", new PromoteResponse(promotedUser),
+        return responseBuilder.success(User.class.getSimpleName(), "promoted", new PromoteResponse(promotedUser),
                 HttpStatus.OK);
     }
 
@@ -85,7 +86,7 @@ public class UserController {
 
         User myUser = userService.getFromToken(token);
 
-        return Utils.successResponse("User", "acquired", new UserSimple(myUser), HttpStatus.OK);
+        return responseBuilder.success("User", "acquired", new UserSimple(myUser), HttpStatus.OK);
     }
 
     @PutMapping("/me")
@@ -100,7 +101,7 @@ public class UserController {
 
         myUser = userService.update(myUser, req);
 
-        return Utils.successResponse("User Profile", "updated", new UserSimple(myUser), HttpStatus.OK);
+        return responseBuilder.success("User Profile", "updated", new UserSimple(myUser), HttpStatus.OK);
     }
 
     @DeleteMapping("/me")
@@ -110,7 +111,7 @@ public class UserController {
 
         userService.delete(myUser);
 
-        return Utils.successResponse("User", "deleted", new UserSimple(myUser), HttpStatus.OK);
+        return responseBuilder.success("User", "deleted", new UserSimple(myUser), HttpStatus.OK);
     }
 
     @GetMapping("/{id}")
@@ -120,7 +121,7 @@ public class UserController {
 
         User targetUser = authorizeReadAccessToUser(token, id, User.Role.ROLE_LIBRARIAN);
 
-        return Utils.successResponse("User", "acquired", new UserSimple(targetUser), HttpStatus.OK);
+        return responseBuilder.success("User", "acquired", new UserSimple(targetUser), HttpStatus.OK);
     }
 
     @PutMapping("/{id}")
@@ -137,7 +138,7 @@ public class UserController {
 
         targetUser = userService.update(targetUser, req);
 
-        return Utils.successResponse("User Profile", "updated", new UserSimple(targetUser), HttpStatus.OK);
+        return responseBuilder.success("User Profile", "updated", new UserSimple(targetUser), HttpStatus.OK);
     }
 
     @DeleteMapping("/{id}")
@@ -149,7 +150,7 @@ public class UserController {
 
         userService.delete(targetUser);
 
-        return Utils.successResponse("User", "acquired", new UserSimple(targetUser), HttpStatus.OK);
+        return responseBuilder.success("User", "acquired", new UserSimple(targetUser), HttpStatus.OK);
     }
 
     @PostMapping("/{id}/reactivate")
@@ -166,7 +167,7 @@ public class UserController {
         reactivatedUser = userService.changeActive(reactivatedUser, true);
         borrowingService.excuseReturnedOverdueBorrowings(reactivatedUser);
 
-        return Utils.successResponse(User.class.getSimpleName(), "re-activated", new UserDetailed(reactivatedUser),
+        return responseBuilder.success(User.class.getSimpleName(), "re-activated", new UserDetailed(reactivatedUser),
                 HttpStatus.OK);
     }
 }

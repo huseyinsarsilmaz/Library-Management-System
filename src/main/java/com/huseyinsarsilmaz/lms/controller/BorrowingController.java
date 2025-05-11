@@ -27,7 +27,7 @@ import com.huseyinsarsilmaz.lms.model.entity.Borrowing;
 import com.huseyinsarsilmaz.lms.model.entity.User;
 import com.huseyinsarsilmaz.lms.service.BorrowingService;
 import com.huseyinsarsilmaz.lms.service.UserService;
-import com.huseyinsarsilmaz.lms.service.Utils;
+import com.huseyinsarsilmaz.lms.util.ResponseBuilder;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -38,6 +38,7 @@ import lombok.RequiredArgsConstructor;
 public class BorrowingController {
     private final BorrowingService borrowingService;
     private final UserService userService;
+    private final ResponseBuilder responseBuilder;
 
     @PostMapping
     public ResponseEntity<ApiResponse<BorrowingSimple>> createBorrowing(
@@ -56,7 +57,7 @@ public class BorrowingController {
 
         Borrowing newBorrowing = borrowingService.create(req);
 
-        return Utils.successResponse(Borrowing.class.getSimpleName(), "created", new BorrowingSimple(newBorrowing),
+        return responseBuilder.success(Borrowing.class.getSimpleName(), "created", new BorrowingSimple(newBorrowing),
                 HttpStatus.CREATED);
     }
 
@@ -73,7 +74,7 @@ public class BorrowingController {
 
         borrowing = borrowingService.returnBorrowing(borrowing);
 
-        return Utils.successResponse(Borrowing.class.getSimpleName(), "returned", new BorrowingDetailed(borrowing),
+        return responseBuilder.success(Borrowing.class.getSimpleName(), "returned", new BorrowingDetailed(borrowing),
                 HttpStatus.OK);
     }
 
@@ -100,7 +101,7 @@ public class BorrowingController {
         List<Borrowing> borrowings = borrowingService.getByBorrowerId(myUser.getId());
         BorrowingHistory borrowingHistory = getBorrowingHistory(borrowings);
 
-        return Utils.successResponse(Borrowing.class.getSimpleName() + " history", "acquired", borrowingHistory,
+        return responseBuilder.success(Borrowing.class.getSimpleName() + " history", "acquired", borrowingHistory,
                 HttpStatus.OK);
     }
 
@@ -116,7 +117,7 @@ public class BorrowingController {
         List<Borrowing> borrowings = borrowingService.getByBorrowerId(borrowedUser.getId());
         BorrowingHistory borrowingHistory = getBorrowingHistory(borrowings);
 
-        return Utils.successResponse(Borrowing.class.getSimpleName() + " history", "acquired", borrowingHistory,
+        return responseBuilder.success(Borrowing.class.getSimpleName() + " history", "acquired", borrowingHistory,
                 HttpStatus.OK);
     }
 
@@ -139,7 +140,7 @@ public class BorrowingController {
 
         Page<BorrowingSimple> page = borrowings.map(BorrowingDetailed::new);
 
-        return Utils.successResponse(Borrowing.class.getSimpleName() + " overdue report", "acquired",
+        return responseBuilder.success(Borrowing.class.getSimpleName() + " overdue report", "acquired",
                 new PagedResponse<>(page),
                 HttpStatus.OK);
     }
@@ -157,7 +158,7 @@ public class BorrowingController {
 
         borrowing = borrowingService.excuseBorrowing(borrowing);
 
-        return Utils.successResponse(Borrowing.class.getSimpleName(), "created", new BorrowingDetailed(borrowing),
+        return responseBuilder.success(Borrowing.class.getSimpleName(), "created", new BorrowingDetailed(borrowing),
                 HttpStatus.OK);
     }
 

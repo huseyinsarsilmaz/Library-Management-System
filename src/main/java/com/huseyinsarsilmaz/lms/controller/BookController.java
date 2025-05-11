@@ -25,7 +25,7 @@ import com.huseyinsarsilmaz.lms.model.entity.Book;
 import com.huseyinsarsilmaz.lms.model.entity.User;
 import com.huseyinsarsilmaz.lms.service.BookService;
 import com.huseyinsarsilmaz.lms.service.UserService;
-import com.huseyinsarsilmaz.lms.service.Utils;
+import com.huseyinsarsilmaz.lms.util.ResponseBuilder;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -37,6 +37,7 @@ public class BookController {
 
     private final BookService bookService;
     private final UserService userService;
+    private final ResponseBuilder responseBuilder;
 
     @PostMapping
     public ResponseEntity<ApiResponse<BookSimple>> createBook(
@@ -50,7 +51,7 @@ public class BookController {
 
         Book newBook = bookService.create(req);
 
-        return Utils.successResponse(Book.class.getSimpleName(), "created", new BookSimple(newBook),
+        return responseBuilder.success(Book.class.getSimpleName(), "created", new BookSimple(newBook),
                 HttpStatus.CREATED);
     }
 
@@ -59,7 +60,7 @@ public class BookController {
 
         Book book = bookService.getById(id);
 
-        return Utils.successResponse(Book.class.getSimpleName(), "acquired", new BookSimple(book), HttpStatus.OK);
+        return responseBuilder.success(Book.class.getSimpleName(), "acquired", new BookSimple(book), HttpStatus.OK);
     }
 
     @PutMapping("/{id}")
@@ -79,7 +80,7 @@ public class BookController {
 
         book = bookService.update(book, req);
 
-        return Utils.successResponse(Book.class.getSimpleName(), "updated", new BookSimple(book), HttpStatus.OK);
+        return responseBuilder.success(Book.class.getSimpleName(), "updated", new BookSimple(book), HttpStatus.OK);
     }
 
     @DeleteMapping("/{id}")
@@ -93,7 +94,7 @@ public class BookController {
         Book book = bookService.getById(id);
         bookService.delete(book);
 
-        return Utils.successResponse(Book.class.getSimpleName(), "deleted", new BookSimple(book), HttpStatus.OK);
+        return responseBuilder.success(Book.class.getSimpleName(), "deleted", new BookSimple(book), HttpStatus.OK);
     }
 
     @GetMapping("/search")
@@ -105,7 +106,8 @@ public class BookController {
         Page<BookSimple> books = bookService.searchBooks(type, query, pageable)
                 .map(BookSimple::new);
 
-        return Utils.successResponse(Book.class.getSimpleName() + "s", "acquired", new PagedResponse<BookSimple>(books),
+        return responseBuilder.success(Book.class.getSimpleName() + "s", "acquired",
+                new PagedResponse<BookSimple>(books),
                 HttpStatus.OK);
     }
 
