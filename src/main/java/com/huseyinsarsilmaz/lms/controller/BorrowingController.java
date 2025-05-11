@@ -116,10 +116,14 @@ public class BorrowingController {
 
         User myUser = userService.getFromToken(token);
         userService.checkRole(myUser, User.Role.ROLE_LIBRARIAN);
+        Page<Borrowing> borrowings;
 
-        Page<Borrowing> borrowings = (borrowerId == null)
-                ? borrowingService.getAllOverdue(pageable)
-                : borrowingService.getOverdueByBorrowerId(borrowerId, pageable);
+        if (borrowerId == null) {
+            borrowings = borrowingService.getAllOverdue(pageable);
+        } else {
+            User borrowedUser = userService.getById(borrowerId);
+            borrowings = borrowingService.getOverdueByBorrowerId(borrowedUser.getId(), pageable);
+        }
 
         Page<BorrowingSimple> page = borrowings.map(BorrowingDetailed::new);
 
