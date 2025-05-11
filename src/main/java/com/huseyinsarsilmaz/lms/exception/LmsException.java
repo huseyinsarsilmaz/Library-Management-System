@@ -10,8 +10,8 @@ public class LmsException extends RuntimeException {
     private final String[] args;
     private final HttpStatus httpStatus;
 
-    public LmsException(String messageKey, String[] args, HttpStatus httpStatus) {
-        super();
+    public LmsException(String messageKey, HttpStatus httpStatus, String... args) {
+        super(messageKey);
         this.type = messageKey;
         this.args = args;
         this.httpStatus = httpStatus;

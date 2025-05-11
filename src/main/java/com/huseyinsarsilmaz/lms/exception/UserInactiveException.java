@@ -2,10 +2,8 @@ package com.huseyinsarsilmaz.lms.exception;
 
 import org.springframework.http.HttpStatus;
 
-public class UserInactiveException extends LmsException {
-
+public final class UserInactiveException extends LmsException {
     public UserInactiveException() {
-        super("inactive", new String[] {}, HttpStatus.FORBIDDEN);
+        super("inactive", HttpStatus.FORBIDDEN);
     }
-
 }
