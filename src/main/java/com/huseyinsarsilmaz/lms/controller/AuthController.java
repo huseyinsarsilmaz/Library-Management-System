@@ -2,8 +2,6 @@ package com.huseyinsarsilmaz.lms.controller;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -15,7 +13,7 @@ import com.huseyinsarsilmaz.lms.model.dto.response.ApiResponse;
 import com.huseyinsarsilmaz.lms.model.dto.response.LoginResponse;
 import com.huseyinsarsilmaz.lms.model.dto.response.RegisterResponse;
 import com.huseyinsarsilmaz.lms.model.entity.User;
-import com.huseyinsarsilmaz.lms.security.JwtService;
+import com.huseyinsarsilmaz.lms.service.AuthService;
 import com.huseyinsarsilmaz.lms.service.UserService;
 import com.huseyinsarsilmaz.lms.service.Utils;
 
@@ -26,32 +24,25 @@ import lombok.RequiredArgsConstructor;
 @RequestMapping("/auth")
 @RequiredArgsConstructor
 public class AuthController {
+
     private final UserService userService;
-    private final AuthenticationManager authenticationManager;
-    private final JwtService jwtService;
-
-    private String getJwtToken(LoginRequest req) {
-        authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(req.getEmail(), req.getPassword()));
-
-        return jwtService.generateToken(req.getEmail());
-    }
+    private final AuthService authService;
 
     @PostMapping("/register")
-    public ResponseEntity<ApiResponse<RegisterResponse>> register(@Valid @RequestBody RegisterRequest req) {
-        userService.isEmailTaken(req.getEmail());
+    public ResponseEntity<ApiResponse<RegisterResponse>> register(@Valid @RequestBody RegisterRequest request) {
+        userService.isEmailTaken(request.getEmail());
 
-        User newUser = userService.register(req);
-        return Utils.successResponse(User.class.getSimpleName(), "registered", new RegisterResponse(newUser),
-                HttpStatus.CREATED);
+        User registeredUser = userService.register(request);
+        RegisterResponse response = new RegisterResponse(registeredUser);
+
+        return Utils.successResponse("User", "registered", response, HttpStatus.CREATED);
     }
 
     @PostMapping("/login")
-    public ResponseEntity<ApiResponse<LoginResponse>> login(@Valid @RequestBody LoginRequest req) {
-        String token = getJwtToken(req);
+    public ResponseEntity<ApiResponse<LoginResponse>> login(@Valid @RequestBody LoginRequest request) {
+        String jwtToken = authService.authenticateAndGenerateToken(request);
+        LoginResponse response = new LoginResponse(jwtToken);
 
-        return Utils.successResponse(User.class.getSimpleName(), "logged in", new LoginResponse(token), HttpStatus.OK);
-
+        return Utils.successResponse("User", "logged in", response, HttpStatus.OK);
     }
-
 }
