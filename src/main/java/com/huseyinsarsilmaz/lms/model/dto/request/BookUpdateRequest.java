@@ -8,11 +8,13 @@ import com.huseyinsarsilmaz.lms.validation.RequiredField;
 import com.huseyinsarsilmaz.lms.validation.StrSize;
 
 import jakarta.validation.constraints.PastOrPresent;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
 @NoArgsConstructor
+@AllArgsConstructor
 public class BookUpdateRequest {
     @RequiredField(entityName = "Book", fieldName = "title")
     @StrSize(entityName = "Book", fieldName = "title", min = 1, max = 255)

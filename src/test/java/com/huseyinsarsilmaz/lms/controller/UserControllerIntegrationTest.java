@@ -59,9 +59,9 @@ class UserControllerIntegrationTest {
                 }
         }
 
-        private HttpEntity<String> createEntity(Object request, String token) {
+        private HttpEntity<String> createEntity(Object request, String email) {
                 HttpHeaders headers = new HttpHeaders();
-                headers.set("Authorization", "Bearer " + jwtService.generateToken(token));
+                headers.set("Authorization", "Bearer " + jwtService.generateToken(email));
                 headers.setContentType(MediaType.APPLICATION_JSON);
                 String json = request != null ? toJson(request) : null;
                 return new HttpEntity<>(json, headers);
