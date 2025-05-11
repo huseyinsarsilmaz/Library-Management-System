@@ -144,7 +144,7 @@ public class BorrowingController {
                 HttpStatus.OK);
     }
 
-    @PostMapping("/excuse/id")
+    @PostMapping("/{id}/excuse")
     public ResponseEntity<ApiResponse<BorrowingDetailed>> excuseBorrowing(
             @RequestHeader("Authorization") String token,
             @PathVariable("id") long id) {
