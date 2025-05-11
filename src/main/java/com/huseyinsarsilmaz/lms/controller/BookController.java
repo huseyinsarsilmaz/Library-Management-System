@@ -5,13 +5,13 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -22,9 +22,7 @@ import com.huseyinsarsilmaz.lms.model.dto.response.ApiResponse;
 import com.huseyinsarsilmaz.lms.model.dto.response.BookSimple;
 import com.huseyinsarsilmaz.lms.model.dto.response.PagedResponse;
 import com.huseyinsarsilmaz.lms.model.entity.Book;
-import com.huseyinsarsilmaz.lms.model.entity.User;
 import com.huseyinsarsilmaz.lms.service.BookService;
-import com.huseyinsarsilmaz.lms.service.UserService;
 import com.huseyinsarsilmaz.lms.util.ResponseBuilder;
 
 import jakarta.validation.Valid;
@@ -35,42 +33,31 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class BookController {
 
+
     private final BookService bookService;
-    private final UserService userService;
     private final ResponseBuilder responseBuilder;
 
+    @PreAuthorize("hasRole('ROLE_LIBRARIAN')")
     @PostMapping
-    public ResponseEntity<ApiResponse<BookSimple>> createBook(
-            @RequestHeader("Authorization") String token,
-            @Valid @RequestBody BookCreateRequest req) {
-
-        User myUser = userService.getFromToken(token);
-        userService.checkRole(myUser, User.Role.ROLE_LIBRARIAN);
+    public ResponseEntity<ApiResponse<BookSimple>> create(@Valid @RequestBody BookCreateRequest req) {
 
         bookService.isIsbnTaken(req.getIsbn());
 
         Book newBook = bookService.create(req);
-
-        return responseBuilder.success(Book.class.getSimpleName(), "created", new BookSimple(newBook),
-                HttpStatus.CREATED);
+        return responseBuilder.success("Book", "created", new BookSimple(newBook), HttpStatus.CREATED);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ApiResponse<BookSimple>> getBook(@PathVariable("id") long id) {
-
+    public ResponseEntity<ApiResponse<BookSimple>> getById(@PathVariable long id) {
         Book book = bookService.getById(id);
-
-        return responseBuilder.success(Book.class.getSimpleName(), "acquired", new BookSimple(book), HttpStatus.OK);
+        return responseBuilder.success("Book", "fetched", new BookSimple(book), HttpStatus.OK);
     }
 
+    @PreAuthorize("hasRole('ROLE_LIBRARIAN')")
     @PutMapping("/{id}")
-    public ResponseEntity<ApiResponse<BookSimple>> updateBook(
-            @RequestHeader("Authorization") String token,
+    public ResponseEntity<ApiResponse<BookSimple>> update(
             @Valid @RequestBody BookUpdateRequest req,
-            @PathVariable("id") long id) {
-
-        User myUser = userService.getFromToken(token);
-        userService.checkRole(myUser, User.Role.ROLE_LIBRARIAN);
+            @PathVariable long id) {
 
         Book book = bookService.getById(id);
 
@@ -78,37 +65,30 @@ public class BookController {
             bookService.isIsbnTaken(req.getIsbn());
         }
 
-        book = bookService.update(book, req);
-
-        return responseBuilder.success(Book.class.getSimpleName(), "updated", new BookSimple(book), HttpStatus.OK);
+        Book updatedBook = bookService.update(book, req);
+        return responseBuilder.success("Book", "updated", new BookSimple(updatedBook), HttpStatus.OK);
     }
 
+    @PreAuthorize("hasRole('ROLE_LIBRARIAN')")
     @DeleteMapping("/{id}")
-    public ResponseEntity<ApiResponse<BookSimple>> deleteBook(
-            @RequestHeader("Authorization") String token,
-            @PathVariable("id") long id) {
-
-        User myUser = userService.getFromToken(token);
-        userService.checkRole(myUser, User.Role.ROLE_LIBRARIAN);
+    public ResponseEntity<ApiResponse<BookSimple>> delete(@PathVariable long id) {
 
         Book book = bookService.getById(id);
         bookService.delete(book);
 
-        return responseBuilder.success(Book.class.getSimpleName(), "deleted", new BookSimple(book), HttpStatus.OK);
+        return responseBuilder.success("Book", "deleted", new BookSimple(book), HttpStatus.OK);
     }
 
     @GetMapping("/search")
-    public ResponseEntity<ApiResponse<PagedResponse<BookSimple>>> searchBooks(
+    public ResponseEntity<ApiResponse<PagedResponse<BookSimple>>> search(
             @RequestParam Book.SearchType type,
             @RequestParam String query,
             @PageableDefault(size = 10, sort = "title") Pageable pageable) {
 
-        Page<BookSimple> books = bookService.searchBooks(type, query, pageable)
+        Page<BookSimple> results = bookService.searchBooks(type, query, pageable)
                 .map(BookSimple::new);
 
-        return responseBuilder.success(Book.class.getSimpleName() + "s", "acquired",
-                new PagedResponse<BookSimple>(books),
-                HttpStatus.OK);
+        return responseBuilder.success("Books", "fetched", new PagedResponse<>(results), HttpStatus.OK);
     }
 
 }

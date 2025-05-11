@@ -2,6 +2,7 @@ package com.huseyinsarsilmaz.lms.controller;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -67,13 +68,9 @@ public class UserController {
         return targetUser;
     }
 
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @PostMapping("/promote")
-    public ResponseEntity<ApiResponse<PromoteResponse>> promote(
-            @RequestHeader("Authorization") String token,
-            @Valid @RequestBody PromoteRequest req) {
-
-        User myUser = userService.getFromToken(token);
-        userService.checkRole(myUser, User.Role.ROLE_ADMIN);
+    public ResponseEntity<ApiResponse<PromoteResponse>> promote(@Valid @RequestBody PromoteRequest req) {
 
         User promotedUser = userService.getByEmail(req.getEmail());
         promotedUser = userService.promote(promotedUser, req.getNewRole());
@@ -153,13 +150,11 @@ public class UserController {
         return responseBuilder.success("User", "acquired", new UserSimple(targetUser), HttpStatus.OK);
     }
 
+    @PreAuthorize("hasRole('ROLE_LIBRARIAN')")
     @PostMapping("/{id}/reactivate")
     public ResponseEntity<ApiResponse<UserDetailed>> excuseBorrowing(
             @RequestHeader("Authorization") String token,
             @PathVariable("id") long id) {
-
-        User myUser = userService.getFromToken(token);
-        userService.checkRole(myUser, User.Role.ROLE_LIBRARIAN);
 
         User reactivatedUser = userService.getById(id);
         userService.checkDeactivated(reactivatedUser);

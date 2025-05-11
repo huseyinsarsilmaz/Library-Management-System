@@ -8,6 +8,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -40,6 +41,7 @@ public class BorrowingController {
     private final UserService userService;
     private final ResponseBuilder responseBuilder;
 
+    @PreAuthorize("hasRole('ROLE_LIBRARIAN')")
     @PostMapping
     public ResponseEntity<ApiResponse<BorrowingSimple>> createBorrowing(
             @RequestHeader("Authorization") String token,
@@ -105,13 +107,10 @@ public class BorrowingController {
                 HttpStatus.OK);
     }
 
+    @PreAuthorize("hasRole('ROLE_LIBRARIAN')")
     @GetMapping("/user/{id}")
-    public ResponseEntity<ApiResponse<BorrowingHistory>> getBorrowingHistory(
-            @RequestHeader("Authorization") String token,
-            @PathVariable("id") long id) {
+    public ResponseEntity<ApiResponse<BorrowingHistory>> getBorrowingHistory(@PathVariable("id") long id) {
 
-        User myUser = userService.getFromToken(token);
-        userService.checkRole(myUser, User.Role.ROLE_LIBRARIAN);
         User borrowedUser = userService.getById(id);
 
         List<Borrowing> borrowings = borrowingService.getByBorrowerId(borrowedUser.getId());
@@ -121,14 +120,12 @@ public class BorrowingController {
                 HttpStatus.OK);
     }
 
+    @PreAuthorize("hasRole('ROLE_LIBRARIAN')")
     @GetMapping("/report")
     public ResponseEntity<ApiResponse<PagedResponse<BorrowingSimple>>> getBorrowingReport(
-            @RequestHeader("Authorization") String token,
             @RequestParam(required = false) Long borrowerId,
             @PageableDefault(size = 10, sort = "borrower") Pageable pageable) {
 
-        User myUser = userService.getFromToken(token);
-        userService.checkRole(myUser, User.Role.ROLE_LIBRARIAN);
         Page<Borrowing> borrowings;
 
         if (borrowerId == null) {
@@ -145,13 +142,9 @@ public class BorrowingController {
                 HttpStatus.OK);
     }
 
+    @PreAuthorize("hasRole('ROLE_LIBRARIAN')")
     @PostMapping("/{id}/excuse")
-    public ResponseEntity<ApiResponse<BorrowingDetailed>> excuseBorrowing(
-            @RequestHeader("Authorization") String token,
-            @PathVariable("id") long id) {
-
-        User myUser = userService.getFromToken(token);
-        userService.checkRole(myUser, User.Role.ROLE_LIBRARIAN);
+    public ResponseEntity<ApiResponse<BorrowingDetailed>> excuseBorrowing(@PathVariable("id") long id) {
 
         Borrowing borrowing = borrowingService.getById(id);
         borrowingService.checkExcusable(borrowing);

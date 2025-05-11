@@ -10,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.InternalAuthenticationServiceException;
+import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -36,6 +37,12 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ApiResponse<String>> handleHttpMessageNotReadableException(
             HttpMessageNotReadableException ex) {
         return responseBuilder.fail("invalid", new String[] { "Request" }, ex.getMessage(), HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(AuthorizationDeniedException.class)
+    public ResponseEntity<ApiResponse<String>> handleAuthorizationDeniedException(
+            AuthorizationDeniedException ex) {
+        return responseBuilder.fail("forbidden", new String[] {}, ex.getMessage(), HttpStatus.FORBIDDEN);
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
