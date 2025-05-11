@@ -92,18 +92,6 @@ public class BorrowingController {
         return new BorrowingHistory(active, returned);
     }
 
-    @GetMapping("/my")
-    public ResponseEntity<ApiResponse<BorrowingHistory>> getMyBorrowingHistory(
-            @RequestHeader("Authorization") String token) {
-
-        User myUser = userService.getFromToken(token);
-        List<Borrowing> borrowings = borrowingService.getByBorrowerId(myUser.getId());
-        BorrowingHistory borrowingHistory = getBorrowingHistory(borrowings);
-
-        return Utils.successResponse(Borrowing.class.getSimpleName() + " history", "acquired", borrowingHistory,
-                HttpStatus.OK);
-    }
-
     @GetMapping("/user/{id}")
     public ResponseEntity<ApiResponse<BorrowingHistory>> getBorrowingHistory(
             @RequestHeader("Authorization") String token,
@@ -111,8 +99,9 @@ public class BorrowingController {
 
         User myUser = userService.getFromToken(token);
         userService.checkRole(myUser, User.Role.ROLE_LIBRARIAN);
+        User borrowedUser = userService.getById(id);
 
-        List<Borrowing> borrowings = borrowingService.getByBorrowerId(id);
+        List<Borrowing> borrowings = borrowingService.getByBorrowerId(borrowedUser.getId());
         BorrowingHistory borrowingHistory = getBorrowingHistory(borrowings);
 
         return Utils.successResponse(Borrowing.class.getSimpleName() + " history", "acquired", borrowingHistory,
