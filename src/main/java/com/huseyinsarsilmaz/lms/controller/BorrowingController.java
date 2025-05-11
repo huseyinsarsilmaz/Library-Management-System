@@ -13,7 +13,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -26,6 +25,7 @@ import com.huseyinsarsilmaz.lms.model.dto.response.BorrowingSimple;
 import com.huseyinsarsilmaz.lms.model.dto.response.PagedResponse;
 import com.huseyinsarsilmaz.lms.model.entity.Borrowing;
 import com.huseyinsarsilmaz.lms.model.entity.User;
+import com.huseyinsarsilmaz.lms.security.CurrentUser;
 import com.huseyinsarsilmaz.lms.service.BorrowingService;
 import com.huseyinsarsilmaz.lms.service.UserService;
 import com.huseyinsarsilmaz.lms.util.ResponseBuilder;
@@ -41,46 +41,7 @@ public class BorrowingController {
     private final UserService userService;
     private final ResponseBuilder responseBuilder;
 
-    @PreAuthorize("hasRole('ROLE_LIBRARIAN')")
-    @PostMapping
-    public ResponseEntity<ApiResponse<BorrowingSimple>> createBorrowing(
-            @RequestHeader("Authorization") String token,
-            @Valid @RequestBody BorrowRequest req) {
-
-        User myUser = userService.getFromToken(token);
-
-        if (req.getBorrowerId() != null) {
-            userService.checkRole(myUser, User.Role.ROLE_LIBRARIAN);
-        } else {
-            req.setBorrowerId(myUser.getId());
-        }
-
-        borrowingService.checkBorrowableByBorrowerId(req.getBorrowerId());
-
-        Borrowing newBorrowing = borrowingService.create(req);
-
-        return responseBuilder.success(Borrowing.class.getSimpleName(), "created", new BorrowingSimple(newBorrowing),
-                HttpStatus.CREATED);
-    }
-
-    @PostMapping("/{id}/return")
-    public ResponseEntity<ApiResponse<BorrowingDetailed>> returnBorrowing(
-            @RequestHeader("Authorization") String token,
-            @PathVariable("id") long id) {
-
-        User myUser = userService.getFromToken(token);
-        Borrowing borrowing = borrowingService.getById(id);
-
-        borrowingService.checkOwnership(myUser, borrowing);
-        borrowingService.checkReturnable(borrowing);
-
-        borrowing = borrowingService.returnBorrowing(borrowing);
-
-        return responseBuilder.success(Borrowing.class.getSimpleName(), "returned", new BorrowingDetailed(borrowing),
-                HttpStatus.OK);
-    }
-
-    private BorrowingHistory getBorrowingHistory(List<Borrowing> borrowings) {
+    private BorrowingHistory toBorrowingHistory(List<Borrowing> borrowings) {
         List<BorrowingSimple> active = new ArrayList<>();
         List<BorrowingDetailed> returned = new ArrayList<>();
 
@@ -95,16 +56,47 @@ public class BorrowingController {
         return new BorrowingHistory(active, returned);
     }
 
+    @PreAuthorize("hasRole('ROLE_LIBRARIAN')")
+    @PostMapping
+    public ResponseEntity<ApiResponse<BorrowingSimple>> createBorrowing(
+            @CurrentUser User myUser,
+            @Valid @RequestBody BorrowRequest req) {
+
+        if (req.getBorrowerId() != null) {
+            userService.checkRole(myUser, User.Role.ROLE_LIBRARIAN);
+        } else {
+            req.setBorrowerId(myUser.getId());
+        }
+
+        borrowingService.checkBorrowableByBorrowerId(req.getBorrowerId());
+
+        Borrowing newBorrowing = borrowingService.create(req);
+
+        return responseBuilder.success("Borrowing", "created", new BorrowingSimple(newBorrowing), HttpStatus.CREATED);
+    }
+
+    @PostMapping("/{id}/return")
+    public ResponseEntity<ApiResponse<BorrowingDetailed>> returnBorrowing(
+            @CurrentUser User myUser,
+            @PathVariable("id") long id) {
+
+        Borrowing borrowing = borrowingService.getById(id);
+
+        borrowingService.checkOwnership(myUser, borrowing);
+        borrowingService.checkReturnable(borrowing);
+
+        borrowing = borrowingService.returnBorrowing(borrowing);
+
+        return responseBuilder.success("Borrowing", "returned", new BorrowingDetailed(borrowing), HttpStatus.OK);
+    }
+
     @GetMapping("/my")
-    public ResponseEntity<ApiResponse<BorrowingHistory>> getMyBorrowingHistory(
-            @RequestHeader("Authorization") String token) {
+    public ResponseEntity<ApiResponse<BorrowingHistory>> getMyBorrowingHistory(@CurrentUser User myUser) {
 
-        User myUser = userService.getFromToken(token);
         List<Borrowing> borrowings = borrowingService.getByBorrowerId(myUser.getId());
-        BorrowingHistory borrowingHistory = getBorrowingHistory(borrowings);
+        BorrowingHistory history = toBorrowingHistory(borrowings);
 
-        return responseBuilder.success(Borrowing.class.getSimpleName() + " history", "acquired", borrowingHistory,
-                HttpStatus.OK);
+        return responseBuilder.success("Borrowing history", "fetched", history, HttpStatus.OK);
     }
 
     @PreAuthorize("hasRole('ROLE_LIBRARIAN')")
@@ -112,12 +104,10 @@ public class BorrowingController {
     public ResponseEntity<ApiResponse<BorrowingHistory>> getBorrowingHistory(@PathVariable("id") long id) {
 
         User borrowedUser = userService.getById(id);
-
         List<Borrowing> borrowings = borrowingService.getByBorrowerId(borrowedUser.getId());
-        BorrowingHistory borrowingHistory = getBorrowingHistory(borrowings);
+        BorrowingHistory history = toBorrowingHistory(borrowings);
 
-        return responseBuilder.success(Borrowing.class.getSimpleName() + " history", "acquired", borrowingHistory,
-                HttpStatus.OK);
+        return responseBuilder.success("Borrowing history", "fetched", history, HttpStatus.OK);
     }
 
     @PreAuthorize("hasRole('ROLE_LIBRARIAN')")
@@ -126,19 +116,13 @@ public class BorrowingController {
             @RequestParam(required = false) Long borrowerId,
             @PageableDefault(size = 10, sort = "borrower") Pageable pageable) {
 
-        Page<Borrowing> borrowings;
-
-        if (borrowerId == null) {
-            borrowings = borrowingService.getAllOverdue(pageable);
-        } else {
-            User borrowedUser = userService.getById(borrowerId);
-            borrowings = borrowingService.getOverdueByBorrowerId(borrowedUser.getId(), pageable);
-        }
+        Page<Borrowing> borrowings = (borrowerId == null)
+                ? borrowingService.getAllOverdue(pageable)
+                : borrowingService.getOverdueByBorrowerId(borrowerId, pageable);
 
         Page<BorrowingSimple> page = borrowings.map(BorrowingDetailed::new);
 
-        return responseBuilder.success(Borrowing.class.getSimpleName() + " overdue report", "acquired",
-                new PagedResponse<>(page),
+        return responseBuilder.success("Borrowing overdue report", "acquired", new PagedResponse<>(page),
                 HttpStatus.OK);
     }
 
@@ -151,8 +135,8 @@ public class BorrowingController {
 
         borrowing = borrowingService.excuseBorrowing(borrowing);
 
-        return responseBuilder.success(Borrowing.class.getSimpleName(), "created", new BorrowingDetailed(borrowing),
-                HttpStatus.OK);
+        return responseBuilder.success("Borrowing", "excused", new BorrowingDetailed(borrowing), HttpStatus.OK);
     }
+
 
 }
