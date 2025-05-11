@@ -204,12 +204,13 @@ public class BorrowingServiceTest {
 
     @Test
     public void testGetByBorrowerId() {
-        when(borrowingRepository.findAllByBorrowerIdWithBook(1L)).thenReturn(List.of(borrowing));
+        Page<Borrowing> mockPage = new PageImpl<>(List.of(borrowing));
+        when(borrowingRepository.findAllByBorrowerIdWithBook(1L, Pageable.ofSize(10))).thenReturn(mockPage);
 
-        List<Borrowing> list = borrowingService.getByBorrowerId(1L);
+    Page<Borrowing> page = borrowingService.getByBorrowerId(1L, Pageable.ofSize(10));
 
-        assertEquals(1, list.size());
-        assertEquals(borrowing, list.get(0));
+        assertEquals(1, page.getContent().size());
+        assertEquals(borrowing, page.getContent().get(0));
     }
 
     @Test

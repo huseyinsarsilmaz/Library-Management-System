@@ -34,7 +34,7 @@ public interface BorrowingRepository extends JpaRepository<Borrowing, Long> {
     Optional<Borrowing> findByIdWithBookAndBorrower(@Param("id") Long id);
 
     @Query("SELECT b FROM Borrowing b JOIN FETCH b.book WHERE b.borrower.id = :borrowerId")
-    List<Borrowing> findAllByBorrowerIdWithBook(@Param("borrowerId") Long borrowerId);
+    Page<Borrowing> findAllByBorrowerIdWithBook(@Param("borrowerId") Long borrowerId, Pageable pageable);
 
     @Query("SELECT b FROM Borrowing b JOIN FETCH b.book WHERE b.borrower.id = :borrowerId AND b.status NOT IN (:statuses)")
     Page<Borrowing> findAllByBorrowerIdAndStatusNotIn(@Param("borrowerId") Long borrowerId,

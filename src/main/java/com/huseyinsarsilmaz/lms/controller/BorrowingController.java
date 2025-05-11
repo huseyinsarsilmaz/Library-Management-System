@@ -1,8 +1,5 @@
 package com.huseyinsarsilmaz.lms.controller;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
@@ -20,7 +17,6 @@ import org.springframework.web.bind.annotation.RestController;
 import com.huseyinsarsilmaz.lms.model.dto.request.BorrowRequest;
 import com.huseyinsarsilmaz.lms.model.dto.response.ApiResponse;
 import com.huseyinsarsilmaz.lms.model.dto.response.BorrowingDetailed;
-import com.huseyinsarsilmaz.lms.model.dto.response.BorrowingHistory;
 import com.huseyinsarsilmaz.lms.model.dto.response.BorrowingSimple;
 import com.huseyinsarsilmaz.lms.model.dto.response.PagedResponse;
 import com.huseyinsarsilmaz.lms.model.entity.Borrowing;
@@ -40,21 +36,6 @@ public class BorrowingController {
     private final BorrowingService borrowingService;
     private final UserService userService;
     private final ResponseBuilder responseBuilder;
-
-    private BorrowingHistory toBorrowingHistory(List<Borrowing> borrowings) {
-        List<BorrowingSimple> active = new ArrayList<>();
-        List<BorrowingDetailed> returned = new ArrayList<>();
-
-        for (Borrowing borrowing : borrowings) {
-            if (borrowing.isReturned()) {
-                returned.add(new BorrowingDetailed(borrowing));
-            } else {
-                active.add(new BorrowingSimple(borrowing));
-            }
-        }
-
-        return new BorrowingHistory(active, returned);
-    }
 
     @PreAuthorize("hasRole('ROLE_LIBRARIAN')")
     @PostMapping
@@ -91,23 +72,28 @@ public class BorrowingController {
     }
 
     @GetMapping("/my")
-    public ResponseEntity<ApiResponse<BorrowingHistory>> getMyBorrowingHistory(@CurrentUser User myUser) {
+    public ResponseEntity<ApiResponse<PagedResponse<BorrowingSimple>>> getMyBorrowingHistory(
+            @CurrentUser User myUser,
+            @PageableDefault(size = 10, sort = "borrower") Pageable pageable) {
 
-        List<Borrowing> borrowings = borrowingService.getByBorrowerId(myUser.getId());
-        BorrowingHistory history = toBorrowingHistory(borrowings);
+        Page<Borrowing> borrowings = borrowingService.getByBorrowerId(myUser.getId(), pageable);
+        Page<BorrowingSimple> page = borrowings.map(BorrowingDetailed::new);
 
-        return responseBuilder.success("Borrowing history", "fetched", history, HttpStatus.OK);
+
+        return responseBuilder.success("Borrowing history", "fetched", new PagedResponse<>(page), HttpStatus.OK);
     }
 
     @PreAuthorize("hasRole('ROLE_LIBRARIAN')")
     @GetMapping("/user/{id}")
-    public ResponseEntity<ApiResponse<BorrowingHistory>> getBorrowingHistory(@PathVariable("id") long id) {
+    public ResponseEntity<ApiResponse<PagedResponse<BorrowingSimple>>> getBorrowingHistory(
+            @PathVariable("id") long id,
+            @PageableDefault(size = 10, sort = "borrower") Pageable pageable) {
 
         User borrowedUser = userService.getById(id);
-        List<Borrowing> borrowings = borrowingService.getByBorrowerId(borrowedUser.getId());
-        BorrowingHistory history = toBorrowingHistory(borrowings);
+        Page<Borrowing> borrowings = borrowingService.getByBorrowerId(borrowedUser.getId(), pageable);
+        Page<BorrowingSimple> page = borrowings.map(BorrowingDetailed::new);
 
-        return responseBuilder.success("Borrowing history", "fetched", history, HttpStatus.OK);
+        return responseBuilder.success("Borrowing history", "fetched", new PagedResponse<>(page), HttpStatus.OK);
     }
 
     @PreAuthorize("hasRole('ROLE_LIBRARIAN')")

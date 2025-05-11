@@ -1,6 +1,5 @@
 package com.huseyinsarsilmaz.lms.service;
 
-import java.util.List;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -22,7 +21,7 @@ public interface BorrowingService {
     // Used entity name because return is a keyword
     public Borrowing returnBorrowing(Borrowing borrowing);
 
-    public List<Borrowing> getByBorrowerId(long borrowerId);
+    public Page<Borrowing> getByBorrowerId(long borrowerId, Pageable pageable);
 
     public Page<Borrowing> getOverdueByBorrowerId(long borrowerId, Pageable pageable);
 

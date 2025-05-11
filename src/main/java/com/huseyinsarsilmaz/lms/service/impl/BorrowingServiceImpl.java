@@ -111,8 +111,8 @@ public class BorrowingServiceImpl implements BorrowingService {
         return borrowingRepository.save(borrowing);
     }
 
-    public List<Borrowing> getByBorrowerId(long borrowerId) {
-        return borrowingRepository.findAllByBorrowerIdWithBook(borrowerId);
+    public Page<Borrowing> getByBorrowerId(long borrowerId, Pageable pageable) {
+        return borrowingRepository.findAllByBorrowerIdWithBook(borrowerId, pageable);
 
     }
 

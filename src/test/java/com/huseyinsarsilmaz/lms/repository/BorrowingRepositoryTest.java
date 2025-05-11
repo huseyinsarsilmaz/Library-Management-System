@@ -212,15 +212,15 @@ public class BorrowingRepositoryTest {
 
     @Test
     public void testFindAllByBorrowerIdWithBook() {
-        List<Borrowing> result = borrowingRepository.findAllByBorrowerIdWithBook(user1.getId());
-        assertEquals(4, result.size());
+        Page<Borrowing> result = borrowingRepository.findAllByBorrowerIdWithBook(user1.getId(), Pageable.ofSize(10));
+        assertEquals(4, result.getContent().size());
         assertTrue(result.stream().allMatch(borrowing -> borrowing.getStatus().equals(Borrowing.Status.BORROWED)));
     }
 
     @Test
     public void testFindAllByBorrowerIdWithBook_whenNotFound() {
-        List<Borrowing> result = borrowingRepository.findAllByBorrowerIdWithBook(user3.getId());
-        assertEquals(0, result.size());
+        Page<Borrowing> result = borrowingRepository.findAllByBorrowerIdWithBook(user3.getId(), Pageable.ofSize(10));
+        assertEquals(0, result.getContent().size());
     }
 
     @Test
