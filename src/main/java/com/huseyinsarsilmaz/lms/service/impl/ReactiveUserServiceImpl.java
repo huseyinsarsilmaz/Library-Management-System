@@ -3,7 +3,7 @@ package com.huseyinsarsilmaz.lms.service.impl;
 import org.springframework.stereotype.Service;
 
 import com.huseyinsarsilmaz.lms.model.entity.User;
-import com.huseyinsarsilmaz.lms.repository.ReactiveUserRepository;
+import com.huseyinsarsilmaz.lms.repository.UserRepository;
 import com.huseyinsarsilmaz.lms.service.ReactiveUserService;
 
 import lombok.RequiredArgsConstructor;
@@ -13,11 +13,12 @@ import reactor.core.publisher.Mono;
 @RequiredArgsConstructor
 public class ReactiveUserServiceImpl implements ReactiveUserService {
 
-    private final ReactiveUserRepository userRepository;
+    private final UserRepository userRepository;
 
-    @Override
     public Mono<User> changeActive(User user, boolean active) {
-        user.setIsActive(active);
-        return userRepository.save(user);
+        return Mono.fromCallable(() -> {
+            user.setIsActive(active);
+            return userRepository.save(user);
+        });
     }
 }
