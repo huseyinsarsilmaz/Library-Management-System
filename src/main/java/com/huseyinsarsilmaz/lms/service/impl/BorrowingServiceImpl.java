@@ -26,6 +26,7 @@ import com.huseyinsarsilmaz.lms.service.BookService;
 import com.huseyinsarsilmaz.lms.service.BorrowingService;
 import com.huseyinsarsilmaz.lms.service.UserService;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -37,6 +38,24 @@ public class BorrowingServiceImpl implements BorrowingService {
 
     private static final List<Borrowing.Status> ACTIVE_BORROWING_STATUSES = List
             .of(Borrowing.Status.BORROWED, Borrowing.Status.OVERDUE);
+
+    private void updateBorrowingStatus(Borrowing borrowing, LocalDate now) {
+        if (borrowing.getDueDate().isBefore(now)) {
+            borrowing.setStatus(Borrowing.Status.RETURNED_OVERDUE);
+        } else {
+            borrowing.setStatus(Borrowing.Status.RETURNED_TIMELY);
+        }
+    }
+
+    private void handleOverdueStatus(Borrowing borrowing) {
+        if (borrowing.getStatus() == Borrowing.Status.RETURNED_OVERDUE) {
+            long overdueCount = borrowingRepository.countByBorrowerIdAndStatus(borrowing.getBorrower().getId(),
+                    Borrowing.Status.OVERDUE);
+            if (overdueCount >= 2) {
+                userService.changeActive(borrowing.getBorrower(), false);
+            }
+        }
+    }
 
     public Borrowing create(BorrowRequest req) {
         boolean alreadyBorrowed = borrowingRepository.existsByBorrowerIdAndBookIdAndStatusIn(
@@ -88,28 +107,18 @@ public class BorrowingServiceImpl implements BorrowingService {
         }
     }
 
+    @Transactional
     public Borrowing returnBorrowing(Borrowing borrowing) {
-
         LocalDate now = LocalDate.now();
         borrowing.setReturnDate(now);
 
-        if (borrowing.getDueDate().isBefore(now)) {
-            borrowing.setStatus(Borrowing.Status.RETURNED_OVERDUE);
-        } else {
-            borrowing.setStatus(Borrowing.Status.RETURNED_TIMELY);
-        }
-
-        if (borrowing.getStatus() == Borrowing.Status.RETURNED_OVERDUE) {
-            long overdueCount = borrowingRepository.countByBorrowerIdAndStatus(borrowing.getBorrower().getId(),
-                    Borrowing.Status.OVERDUE);
-            if (overdueCount >= 2) {
-                userService.changeActive(borrowing.getBorrower(), false);
-            }
-        }
+        updateBorrowingStatus(borrowing, now);
+        handleOverdueStatus(borrowing);
 
         bookService.updateAvailability(borrowing.getBook(), true);
         return borrowingRepository.save(borrowing);
     }
+
 
     public Page<Borrowing> getByBorrowerId(long borrowerId, Pageable pageable) {
         return borrowingRepository.findAllByBorrowerIdWithBook(borrowerId, pageable);
@@ -138,6 +147,7 @@ public class BorrowingServiceImpl implements BorrowingService {
         }
     }
 
+    @Transactional
     public void excuseReturnedOverdueBorrowings(User user) {
         List<Borrowing> overdueBorrowings = borrowingRepository.findByBorrowerIdAndStatus(user.getId(),
                 Status.RETURNED_OVERDUE);
@@ -149,6 +159,7 @@ public class BorrowingServiceImpl implements BorrowingService {
         borrowingRepository.saveAll(overdueBorrowings);
     }
 
+    @Transactional
     public Borrowing excuseBorrowing(Borrowing borrowing) {
         borrowing.setStatus(Status.RETURNED_EXCUSED);
 
@@ -162,6 +173,7 @@ public class BorrowingServiceImpl implements BorrowingService {
     }
 
     @Scheduled(cron = "0 0 19 * * *")
+    @Transactional
     public void markOverdueBorrowings() {
         List<Borrowing> borrowings = borrowingRepository.findPastDueByStatus(Borrowing.Status.BORROWED,
                 LocalDate.now());
