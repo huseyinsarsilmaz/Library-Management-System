@@ -11,15 +11,16 @@ import com.huseyinsarsilmaz.lms.exception.AlreadyExistsException;
 import com.huseyinsarsilmaz.lms.exception.ForbiddenException;
 import com.huseyinsarsilmaz.lms.exception.UserInactiveException;
 import com.huseyinsarsilmaz.lms.exception.UserNotDeactivatedException;
+import com.huseyinsarsilmaz.lms.exception.UserPromotionException;
 import com.huseyinsarsilmaz.lms.exception.NotFoundException;
 import com.huseyinsarsilmaz.lms.model.dto.request.RegisterRequest;
 import com.huseyinsarsilmaz.lms.model.dto.request.UserUpdateRequest;
 import com.huseyinsarsilmaz.lms.model.entity.User;
 import com.huseyinsarsilmaz.lms.model.mapper.UserMapper;
 import com.huseyinsarsilmaz.lms.repository.UserRepository;
-import com.huseyinsarsilmaz.lms.security.JwtService;
 import com.huseyinsarsilmaz.lms.service.UserService;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -27,8 +28,11 @@ import lombok.RequiredArgsConstructor;
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
-    private final JwtService jwtService;
     private final UserMapper userMapper;
+
+    private Set<String> parseRoles(String rolesCsv) {
+        return new HashSet<>(Arrays.asList(rolesCsv.split(",")));
+    }
 
     public void isEmailTaken(String email) {
         if (userRepository.findByEmail(email).isPresent()) {
@@ -38,11 +42,11 @@ public class UserServiceImpl implements UserService {
 
     public User register(RegisterRequest req) {
         isEmailTaken(req.getEmail());
-        req.setPassword(passwordEncoder.encode(req.getPassword()));
-        Set<String> roles = new HashSet<>();
-        roles.add(User.Role.ROLE_PATRON.name());
+        User user = userMapper.toEntity(req);
+        user.setPassword(passwordEncoder.encode(req.getPassword()));
+        user.setRoles(User.Role.ROLE_PATRON.name());
 
-        return userRepository.save(userMapper.toEntity(req));
+        return userRepository.save(user);
     }
 
     public User getByEmail(String email) {
@@ -56,47 +60,35 @@ public class UserServiceImpl implements UserService {
                 .orElseThrow(() -> new NotFoundException("User", "id"));
     }
 
+    @Transactional
     public User promote(User user, User.Role newRole) {
-        if (newRole == User.Role.ROLE_ADMIN) {
-            throw new ForbiddenException();
-        } else if (newRole == User.Role.ROLE_PATRON) {
-            return user;
+        Set<String> roles = parseRoles(user.getRoles());
+        if (newRole == User.Role.ROLE_ADMIN || newRole == User.Role.ROLE_PATRON || roles.contains(newRole.name())) {
+            throw new UserPromotionException();
         }
 
-        String[] currentRoles = user.getRoles().split(",");
-        Set<String> newRoles = new HashSet<>(Arrays.asList(currentRoles));
+        roles.add(newRole.name());
 
-        if (newRoles.contains(newRole.name())) {
-            return user;
-        }
-
-        newRoles.add(newRole.name());
-
-        user.setRoles(String.join(",", newRoles));
+        user.setRoles(String.join(",", roles));
         return userRepository.save(user);
     }
 
-    public User getFromToken(String token) {
-        token = token.substring(7);
-        String email = jwtService.extractEmail(token);
-        return getByEmail(email);
-    }
-
-    public void checkRole(User user, User.Role requiredRole) {
-        String[] rolesArr = user.getRoles().split(",");
-        Set<String> roles = new HashSet<>(Arrays.asList(rolesArr));
+    public void checkHasRole(User user, User.Role requiredRole) {
+        Set<String> roles = parseRoles(user.getRoles());
 
         if (!roles.contains(requiredRole.name())) {
             throw new ForbiddenException();
         }
     }
 
+    @Transactional
     public User update(User user, UserUpdateRequest req) {
         userMapper.updateEntity(user, req);
 
         return userRepository.save(user);
     }
 
+    @Transactional
     public void delete(User user) {
         userRepository.delete(user);
     }
@@ -107,6 +99,7 @@ public class UserServiceImpl implements UserService {
         }
     }
 
+    @Transactional
     public User changeActive(User user, boolean newActive) {
         user.setIsActive(newActive);
         return userRepository.save(user);

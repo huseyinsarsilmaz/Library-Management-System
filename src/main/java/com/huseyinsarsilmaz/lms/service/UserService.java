@@ -16,9 +16,7 @@ public interface UserService {
 
     public User promote(User user, User.Role newRole);
 
-    public User getFromToken(String token);
-
-    public void checkRole(User user, User.Role requiredRole);
+    public void checkHasRole(User user, User.Role requiredRole);
 
     public User update(User user, UserUpdateRequest req);
 

@@ -161,29 +161,19 @@ public class UserServiceTest {
         verify(userRepository).save(user);
     }
 
-    @Test
-    public void testGetFromToken() {
-        when(jwtService.extractEmail(anyString())).thenReturn("huseyinsarsilmaz@hotmail.com");
-
-        when(userRepository.findByEmail(anyString())).thenReturn(Optional.of(user));
-
-        User result = userService.getFromToken("Bearer token");
-        assertNotNull(result);
-        assertEquals("huseyinsarsilmaz@hotmail.com", result.getEmail());
-    }
 
     @Test
-    public void testCheckRole_whenRoleMatches() {
+    public void testcheckHasRole_whenRoleMatches() {
         user.setRoles("ROLE_PATRON,ROLE_LIBRARIAN");
 
-        assertDoesNotThrow(() -> userService.checkRole(user, User.Role.ROLE_PATRON));
+        assertDoesNotThrow(() -> userService.checkHasRole(user, User.Role.ROLE_PATRON));
     }
 
     @Test
-    public void testCheckRole_whenRoleDoesNotMatch() {
+    public void testcheckHasRole_whenRoleDoesNotMatch() {
         user.setRoles("ROLE_PATRON");
 
-        assertThrows(ForbiddenException.class, () -> userService.checkRole(user, User.Role.ROLE_LIBRARIAN));
+        assertThrows(ForbiddenException.class, () -> userService.checkHasRole(user, User.Role.ROLE_LIBRARIAN));
     }
 
     @Test

@@ -39,7 +39,7 @@ public class UserController {
     private final UserMapper userMapper;
 
     private User authorizeAccessToUser(User myUser, long targetUserId, boolean modify) {
-        userService.checkRole(myUser, User.Role.ROLE_LIBRARIAN);
+        userService.checkHasRole(myUser, User.Role.ROLE_LIBRARIAN);
 
         User targetUser = userService.getById(targetUserId);
         String roles = targetUser.getRoles();
@@ -49,7 +49,7 @@ public class UserController {
                 roles.contains(User.Role.ROLE_LIBRARIAN.name());
 
         if ((isManager && modify) || isAdmin) {
-            userService.checkRole(myUser, User.Role.ROLE_ADMIN);
+            userService.checkHasRole(myUser, User.Role.ROLE_ADMIN);
         }
 
         return targetUser;

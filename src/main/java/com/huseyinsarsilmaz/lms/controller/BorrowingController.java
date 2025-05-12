@@ -46,7 +46,7 @@ public class BorrowingController {
             @Valid @RequestBody BorrowRequest req) {
 
         if (req.getBorrowerId() != null) {
-            userService.checkRole(myUser, User.Role.ROLE_LIBRARIAN);
+            userService.checkHasRole(myUser, User.Role.ROLE_LIBRARIAN);
         } else {
             req.setBorrowerId(myUser.getId());
         }
