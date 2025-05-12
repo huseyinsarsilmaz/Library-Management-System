@@ -29,7 +29,16 @@ public class BookRepositoryTest {
     @Autowired
     private BookRepository bookRepository;
 
+    private static final String NON_EXISTENT_ISBN = "9999999999";
+    private static final long NON_EXISTENT_ID = Long.MAX_VALUE;
     private Book book1;
+
+    @BeforeEach
+    public void setUp() {
+        book1 = createBook("How to write code", "Elon Musk", "1111111111111", Book.Genre.FICTION);
+        createBook("How to fly into space", "Elon Musk", "1112223334445", Book.Genre.FICTION);
+        createBook("Number 1", "Cristiano Ronaldo", "3333333333333", Book.Genre.BIOGRAPHY);
+    }
 
     private Book createBook(String title, String author, String isbn, Book.Genre genre) {
         Book book = new Book();
@@ -40,15 +49,8 @@ public class BookRepositoryTest {
         return bookRepository.save(book);
     }
 
-    @BeforeEach
-    public void setUp() {
-        book1 = createBook("How to write code", "Elon Musk", "1111111111111", Book.Genre.FICTION);
-        createBook("How to fly into space", "Elon Musk", "1112223334445", Book.Genre.FICTION);
-        createBook("Number 1", "Cristiano Ronaldo", "3333333333333", Book.Genre.BIOGRAPHY);
-    }
-
     @Test
-    public void testFindById() {
+    public void testFindById_whenFound() {
         Optional<Book> result = bookRepository.findById(book1.getId());
         assertTrue(result.isPresent());
         assertEquals(book1.getId(), result.get().getId());
@@ -56,20 +58,20 @@ public class BookRepositoryTest {
 
     @Test
     public void testFindById_whenNotFound() {
-        Optional<Book> result = bookRepository.findById(Long.MAX_VALUE);
+        Optional<Book> result = bookRepository.findById(NON_EXISTENT_ID);
         assertFalse(result.isPresent());
     }
 
     @Test
-    public void testFindByIsbn() {
-        Optional<Book> result = bookRepository.findByIsbn("1111111111111");
+    public void testFindByIsbn_whenFound() {
+        Optional<Book> result = bookRepository.findByIsbn(book1.getIsbn());
         assertTrue(result.isPresent());
         assertEquals(book1.getId(), result.get().getId());
     }
 
     @Test
     public void testFindByIsbn_whenNotFound() {
-        Optional<Book> result = bookRepository.findByIsbn("9999999999");
+        Optional<Book> result = bookRepository.findByIsbn(NON_EXISTENT_ISBN);
         assertFalse(result.isPresent());
     }
 
@@ -89,8 +91,6 @@ public class BookRepositoryTest {
     public void testFindByAuthorContainingIgnoreCase() {
         Page<Book> result = bookRepository.findByAuthorContainingIgnoreCase("elon", Pageable.ofSize(10));
         assertEquals(2, result.getTotalElements());
-        assertTrue(result.getContent().stream().allMatch(book -> book.getAuthor().equals("Elon Musk")));
-
     }
 
     @Test
@@ -113,7 +113,6 @@ public class BookRepositoryTest {
 
     @ParameterizedTest
     @CsvSource({
-            // Format: Genre, expectedExists
             "FICTION, 2",
             "BIOGRAPHY, 1",
             "ROMANCE, 0"

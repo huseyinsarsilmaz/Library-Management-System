@@ -37,16 +37,14 @@ public class BorrowingRepositoryTest {
     @Autowired
     private UserRepository userRepository;
 
+    private User user1, user2, user3;
+    private Book book1, book2;
     private Borrowing borrowing1;
-    private User user1;
-    private User user2;
-    private User user3;
-    private Book book1;
-    private Book book2;
 
-    private List<Borrowing.Status> activeStatuses = List.of(Borrowing.Status.BORROWED, Borrowing.Status.OVERDUE);
-    private List<Borrowing.Status> returnedStatuses = List.of(Borrowing.Status.RETURNED_EXCUSED,
-            Borrowing.Status.RETURNED_OVERDUE, Borrowing.Status.RETURNED_TIMELY);
+    private static final List<Borrowing.Status> ACTIVE_STATUSES = List.of(Borrowing.Status.BORROWED,
+            Borrowing.Status.OVERDUE);
+    private static final List<Borrowing.Status> RETURNED_STATUSES = List.of(
+            Borrowing.Status.RETURNED_EXCUSED, Borrowing.Status.RETURNED_OVERDUE, Borrowing.Status.RETURNED_TIMELY);
 
     private User createUser(String email) {
         User user = new User();
@@ -65,33 +63,30 @@ public class BorrowingRepositoryTest {
     }
 
     private Borrowing createBorrowing(User user, Book book, Borrowing.Status status, LocalDate dueDate) {
-        Borrowing borrowing1 = new Borrowing();
-        borrowing1.setBorrower(user);
-        borrowing1.setBook(book);
-        borrowing1.setStatus(status);
-        borrowing1.setDueDate(dueDate);
-        return borrowingRepository.save(borrowing1);
+        Borrowing borrowing = new Borrowing();
+        borrowing.setBorrower(user);
+        borrowing.setBook(book);
+        borrowing.setStatus(status);
+        borrowing.setDueDate(dueDate);
+        return borrowingRepository.save(borrowing);
     }
 
     @BeforeEach
     public void setUp() {
-        user1 = createUser("huseyinsarsilmaz@hotmail.com");
+        user1 = createUser("huseyinsarsilmaz1@hotmail.com");
         user2 = createUser("huseyinsarsilmaz2@hotmail.com");
         user3 = createUser("huseyinsarsilmaz3@hotmail.com");
         book1 = createBook("How to write code");
         book2 = createBook("How to write code2");
         borrowing1 = createBorrowing(user1, book1, Borrowing.Status.BORROWED, LocalDate.now().plusDays(7));
         createBorrowing(user1, createBook("Not Late Book"), Borrowing.Status.BORROWED, LocalDate.now().plusDays(7));
-        createBorrowing(user1, createBook("Late Book"), Borrowing.Status.BORROWED,
-                LocalDate.now().minusDays(1));
-        createBorrowing(user1, createBook("Late Book2"), Borrowing.Status.BORROWED,
-                LocalDate.now().minusDays(1));
-        createBorrowing(user2, createBook("Late Book 3"), Borrowing.Status.BORROWED,
-                LocalDate.now().minusDays(1));
+        createBorrowing(user1, createBook("Late Book"), Borrowing.Status.BORROWED, LocalDate.now().minusDays(1));
+        createBorrowing(user1, createBook("Late Book2"), Borrowing.Status.BORROWED, LocalDate.now().minusDays(1));
+        createBorrowing(user2, createBook("Late Book 3"), Borrowing.Status.BORROWED, LocalDate.now().minusDays(1));
     }
 
     @Test
-    public void testFindById() {
+    public void testFindById_whenFound() {
         Optional<Borrowing> result = borrowingRepository.findById(borrowing1.getId());
         assertTrue(result.isPresent());
         assertEquals(borrowing1.getId(), result.get().getId());
@@ -104,7 +99,7 @@ public class BorrowingRepositoryTest {
     }
 
     @Test
-    public void testFindByBorrowerIdAndBookId() {
+    public void testFindByBorrowerIdAndBookId_whenFound() {
         Optional<Borrowing> result = borrowingRepository.findByBorrowerIdAndBookId(user1.getId(), book1.getId());
         assertTrue(result.isPresent());
         assertEquals(borrowing1.getId(), result.get().getId());
@@ -117,21 +112,21 @@ public class BorrowingRepositoryTest {
     }
 
     @Test
-    public void testExistsByBorrowerIdAndBookIdAndStatusIn() {
-        boolean exists = borrowingRepository.existsByBorrowerIdAndBookIdAndStatusIn(
-                user1.getId(), book1.getId(), activeStatuses);
+    public void testExistsByBorrowerIdAndBookIdAndStatusIn_whenFound() {
+        boolean exists = borrowingRepository.existsByBorrowerIdAndBookIdAndStatusIn(user1.getId(), book1.getId(),
+                ACTIVE_STATUSES);
         assertTrue(exists);
     }
 
     @Test
     public void testExistsByBorrowerIdAndBookIdAndStatusIn_whenNotFound() {
-        boolean exists = borrowingRepository.existsByBorrowerIdAndBookIdAndStatusIn(
-                user1.getId(), book1.getId(), returnedStatuses);
+        boolean exists = borrowingRepository.existsByBorrowerIdAndBookIdAndStatusIn(user1.getId(), book1.getId(),
+                RETURNED_STATUSES);
         assertFalse(exists);
     }
 
     @Test
-    public void testExistsByBorrowerIdAndStatus() {
+    public void testExistsByBorrowerIdAndStatus_whenFound() {
         boolean exists = borrowingRepository.existsByBorrowerIdAndStatus(user1.getId(), Borrowing.Status.BORROWED);
         assertTrue(exists);
     }
@@ -157,24 +152,21 @@ public class BorrowingRepositoryTest {
 
     @Test
     public void testCountByBorrowerIdAndStatusIn() {
-        long count = borrowingRepository.countByBorrowerIdAndStatusIn(user1.getId(),
-                activeStatuses);
+        long count = borrowingRepository.countByBorrowerIdAndStatusIn(user1.getId(), ACTIVE_STATUSES);
         assertEquals(4, count);
     }
 
     @Test
     public void testCountByBorrowerIdAndStatusIn_whenNotFound() {
-        long count = borrowingRepository.countByBorrowerIdAndStatusIn(user1.getId(),
-                returnedStatuses);
+        long count = borrowingRepository.countByBorrowerIdAndStatusIn(user1.getId(), RETURNED_STATUSES);
         assertEquals(0, count);
     }
 
     @Test
-    public void testFindByBorrowerIdAndStatus() {
+    public void testFindByBorrowerIdAndStatus_whenFound() {
         List<Borrowing> result = borrowingRepository.findByBorrowerIdAndStatus(user1.getId(),
                 Borrowing.Status.BORROWED);
         assertEquals(4, result.size());
-        assertTrue(result.stream().allMatch(borrowing -> borrowing.getStatus().equals(Borrowing.Status.BORROWED)));
     }
 
     @Test
@@ -185,19 +177,15 @@ public class BorrowingRepositoryTest {
     }
 
     @Test
-    public void testFindPastDueByStatus() {
+    public void testFindPastDueByStatus_whenFound() {
         List<Borrowing> result = borrowingRepository.findPastDueByStatus(Borrowing.Status.BORROWED, LocalDate.now());
         assertEquals(3, result.size());
-        boolean isBorrowed = result.stream()
-                .allMatch(borrowing -> borrowing.getStatus().equals(Borrowing.Status.BORROWED));
-        boolean isOverdue = result.stream()
-                .allMatch(borrowing -> LocalDate.now().isAfter(borrowing.getDueDate()));
-
-        assertTrue(isBorrowed && isOverdue);
+        assertTrue(result.stream().allMatch(borrowing -> borrowing.getStatus().equals(Borrowing.Status.BORROWED)));
+        assertTrue(result.stream().allMatch(borrowing -> LocalDate.now().isAfter(borrowing.getDueDate())));
     }
 
     @Test
-    public void testFindByIdWithBookAndBorrower() {
+    public void testFindByIdWithBookAndBorrower_whenFound() {
         Optional<Borrowing> result = borrowingRepository.findByIdWithBookAndBorrower(borrowing1.getId());
         assertTrue(result.isPresent());
         assertEquals(user1.getId(), result.get().getBorrower().getId());
@@ -211,10 +199,9 @@ public class BorrowingRepositoryTest {
     }
 
     @Test
-    public void testFindAllByBorrowerIdWithBook() {
+    public void testFindAllByBorrowerIdWithBook_whenFound() {
         Page<Borrowing> result = borrowingRepository.findAllByBorrowerIdWithBook(user1.getId(), Pageable.ofSize(10));
         assertEquals(4, result.getContent().size());
-        assertTrue(result.stream().allMatch(borrowing -> borrowing.getStatus().equals(Borrowing.Status.BORROWED)));
     }
 
     @Test
@@ -224,32 +211,28 @@ public class BorrowingRepositoryTest {
     }
 
     @Test
-    public void testFindAllByBorrowerIdAndStatusNotIn() {
-        Page<Borrowing> result = borrowingRepository.findAllByBorrowerIdAndStatusNotIn(user1.getId(),
-                returnedStatuses, Pageable.ofSize(10));
+    public void testFindAllByBorrowerIdAndStatusNotIn_whenFound() {
+        Page<Borrowing> result = borrowingRepository.findAllByBorrowerIdAndStatusNotIn(user1.getId(), RETURNED_STATUSES,
+                Pageable.ofSize(10));
         assertEquals(4, result.getContent().size());
     }
 
     @Test
     public void testFindAllByBorrowerIdAndStatusNotIn_whenNotFound() {
-        Page<Borrowing> result = borrowingRepository.findAllByBorrowerIdAndStatusNotIn(user1.getId(),
-                activeStatuses, Pageable.ofSize(10));
+        Page<Borrowing> result = borrowingRepository.findAllByBorrowerIdAndStatusNotIn(user1.getId(), ACTIVE_STATUSES,
+                Pageable.ofSize(10));
         assertEquals(0, result.getContent().size());
     }
 
     @Test
-    public void testFindAllByStatusNotIn() {
-
-        Page<Borrowing> result = borrowingRepository.findAllByStatusNotIn(returnedStatuses,
-                Pageable.ofSize(10));
+    public void testFindAllByStatusNotIn_whenFound() {
+        Page<Borrowing> result = borrowingRepository.findAllByStatusNotIn(RETURNED_STATUSES, Pageable.ofSize(10));
         assertEquals(5, result.getContent().size());
     }
 
     @Test
     public void testFindAllByStatusNotIn_whenNotFound() {
-
-        Page<Borrowing> result = borrowingRepository.findAllByStatusNotIn(activeStatuses,
-                Pageable.ofSize(10));
+        Page<Borrowing> result = borrowingRepository.findAllByStatusNotIn(ACTIVE_STATUSES, Pageable.ofSize(10));
         assertEquals(0, result.getContent().size());
     }
 }

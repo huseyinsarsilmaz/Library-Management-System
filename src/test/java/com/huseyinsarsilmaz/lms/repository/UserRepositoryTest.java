@@ -27,6 +27,8 @@ public class UserRepositoryTest {
     @Autowired
     private UserRepository userRepository;
 
+    private static final String NON_EXISTENT_EMAIL = "notexists@hotmail.com";
+
     private User activeUser;
     private User inactiveUser;
 
@@ -44,7 +46,7 @@ public class UserRepositoryTest {
     }
 
     @Test
-    public void testFindById() {
+    public void testFindById_whenUserFound() {
         Optional<User> optUser = userRepository.findById(activeUser.getId());
 
         assertTrue(optUser.isPresent());
@@ -59,23 +61,22 @@ public class UserRepositoryTest {
     }
 
     @Test
-    public void testFindByEmail() {
-        Optional<User> optUser = userRepository.findByEmail("huseyinsarsilmaz@hotmail.com");
+    public void testFindByEmail_whenUserFound() {
+        Optional<User> optUser = userRepository.findByEmail(activeUser.getEmail());
 
         assertTrue(optUser.isPresent());
-        assertEquals("huseyinsarsilmaz@hotmail.com", optUser.get().getEmail());
+        assertEquals(activeUser.getEmail(), optUser.get().getEmail());
     }
 
     @Test
     public void testFindByEmail_whenUserNotFound() {
-        Optional<User> optUser = userRepository.findByEmail("notfound@example.com");
+        Optional<User> optUser = userRepository.findByEmail(NON_EXISTENT_EMAIL);
 
         assertFalse(optUser.isPresent());
     }
 
     @ParameterizedTest
     @CsvSource({
-            // Format: id, expectedExists
             "active, false",
             "inactive, true",
             "999, false"
@@ -90,4 +91,5 @@ public class UserRepositoryTest {
         boolean exists = userRepository.existsByIdAndIsActiveFalse(idToCheck);
         assertEquals(expectedExists, exists);
     }
+
 }
