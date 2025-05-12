@@ -14,6 +14,7 @@ import com.huseyinsarsilmaz.lms.model.dto.response.PromoteResponse;
 import com.huseyinsarsilmaz.lms.model.dto.response.UserDetailed;
 import com.huseyinsarsilmaz.lms.model.dto.response.UserSimple;
 import com.huseyinsarsilmaz.lms.model.entity.User;
+import com.huseyinsarsilmaz.lms.repository.BorrowingRepository;
 import com.huseyinsarsilmaz.lms.repository.UserRepository;
 import com.huseyinsarsilmaz.lms.security.JwtService;
 
@@ -38,6 +39,9 @@ class UserControllerIntegrationTest {
 
         @Autowired
         private UserRepository userRepository;
+
+        @Autowired
+        private BorrowingRepository borrowingRepository;
 
         @Autowired
         private JwtService jwtService;
@@ -114,6 +118,7 @@ class UserControllerIntegrationTest {
                         }
                 });
 
+                borrowingRepository.deleteAll();
                 userRepository.deleteAll();
 
                 librarianUser = createUser("huseyinsarsilmaz@hotmail.com", "ROLE_LIBRARIAN,ROLE_PATRON", "Hüseyin",
