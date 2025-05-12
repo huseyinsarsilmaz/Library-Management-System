@@ -42,8 +42,6 @@ public class BookController {
     @PostMapping
     public ResponseEntity<ApiResponse<BookSimple>> create(@Valid @RequestBody BookCreateRequest req) {
 
-        bookService.isIsbnTaken(req.getIsbn());
-
         Book newBook = bookService.create(req);
         return responseBuilder.success("Book", "created", bookMapper.toDtoSimple(newBook), HttpStatus.CREATED);
     }

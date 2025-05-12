@@ -2,7 +2,6 @@ package com.huseyinsarsilmaz.lms.service.impl;
 
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.Optional;
 import java.util.Set;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -38,6 +37,7 @@ public class UserServiceImpl implements UserService {
     }
 
     public User register(RegisterRequest req) {
+        isEmailTaken(req.getEmail());
         req.setPassword(passwordEncoder.encode(req.getPassword()));
         Set<String> roles = new HashSet<>();
         roles.add(User.Role.ROLE_PATRON.name());
@@ -46,21 +46,14 @@ public class UserServiceImpl implements UserService {
     }
 
     public User getByEmail(String email) {
-        Optional<User> optUser = userRepository.findByEmail(email);
-        if (optUser.isEmpty()) {
-            throw new NotFoundException(User.class.getSimpleName(), "email");
-        }
-
-        return optUser.get();
+        return userRepository.findByEmail(email)
+                .orElseThrow(() -> new NotFoundException("User", "email"));
     }
 
-    public User getById(long id) {
-        Optional<User> optUser = userRepository.findById(id);
-        if (optUser.isEmpty()) {
-            throw new NotFoundException(User.class.getSimpleName(), "id");
-        }
 
-        return optUser.get();
+    public User getById(long id) {
+        return userRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("User", "id"));
     }
 
     public User promote(User user, User.Role newRole) {
