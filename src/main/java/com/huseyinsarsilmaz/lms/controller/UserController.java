@@ -19,6 +19,7 @@ import com.huseyinsarsilmaz.lms.model.dto.response.PromoteResponse;
 import com.huseyinsarsilmaz.lms.model.dto.response.UserDetailed;
 import com.huseyinsarsilmaz.lms.model.dto.response.UserSimple;
 import com.huseyinsarsilmaz.lms.model.entity.User;
+import com.huseyinsarsilmaz.lms.model.mapper.UserMapper;
 import com.huseyinsarsilmaz.lms.security.CurrentUser;
 import com.huseyinsarsilmaz.lms.service.BorrowingService;
 import com.huseyinsarsilmaz.lms.service.UserService;
@@ -35,6 +36,7 @@ public class UserController {
     private final UserService userService;
     private final BorrowingService borrowingService;
     private final ResponseBuilder responseBuilder;
+    private final UserMapper userMapper;
 
     private User authorizeAccessToUser(User myUser, long targetUserId, boolean modify) {
         userService.checkRole(myUser, User.Role.ROLE_LIBRARIAN);
@@ -65,7 +67,7 @@ public class UserController {
     @GetMapping("/me")
     public ResponseEntity<ApiResponse<UserSimple>> getMyUser(@CurrentUser User myUser) {
 
-        return responseBuilder.success("User", "fetched", new UserSimple(myUser), HttpStatus.OK);
+        return responseBuilder.success("User", "fetched", userMapper.toDtoSimple(myUser), HttpStatus.OK);
     }
 
     @PutMapping("/me")
@@ -77,14 +79,14 @@ public class UserController {
 
         myUser = userService.update(myUser, req);
 
-        return responseBuilder.success("User Profile", "updated", new UserSimple(myUser), HttpStatus.OK);
+        return responseBuilder.success("User Profile", "updated", userMapper.toDtoSimple(myUser), HttpStatus.OK);
     }
 
     @DeleteMapping("/me")
     public ResponseEntity<ApiResponse<UserSimple>> deleteMyUser(@CurrentUser User myUser) {
         userService.delete(myUser);
 
-        return responseBuilder.success("User", "deleted", new UserSimple(myUser), HttpStatus.OK);
+        return responseBuilder.success("User", "deleted", userMapper.toDtoSimple(myUser), HttpStatus.OK);
     }
 
     @GetMapping("/{id}")
@@ -93,7 +95,7 @@ public class UserController {
             @PathVariable("id") long id) {
         User targetUser = authorizeAccessToUser(myUser, id, false);
 
-        return responseBuilder.success("User", "fetched", new UserSimple(targetUser), HttpStatus.OK);
+        return responseBuilder.success("User", "fetched", userMapper.toDtoSimple(targetUser), HttpStatus.OK);
     }
 
     @PutMapping("/{id}")
@@ -108,7 +110,7 @@ public class UserController {
 
         targetUser = userService.update(targetUser, req);
 
-        return responseBuilder.success("User Profile", "updated", new UserSimple(targetUser), HttpStatus.OK);
+        return responseBuilder.success("User Profile", "updated", userMapper.toDtoSimple(targetUser), HttpStatus.OK);
     }
 
     @DeleteMapping("/{id}")
@@ -118,7 +120,7 @@ public class UserController {
         User targetUser = authorizeAccessToUser(myUser, id, true);
         userService.delete(targetUser);
 
-        return responseBuilder.success("User", "deleted", new UserSimple(targetUser), HttpStatus.OK);
+        return responseBuilder.success("User", "deleted", userMapper.toDtoSimple(targetUser), HttpStatus.OK);
     }
 
     @PreAuthorize("hasRole('ROLE_LIBRARIAN')")
@@ -131,7 +133,8 @@ public class UserController {
         reactivatedUser = userService.changeActive(reactivatedUser, true);
         borrowingService.excuseReturnedOverdueBorrowings(reactivatedUser);
 
-        return responseBuilder.success("User", "re-activated", new UserDetailed(reactivatedUser), HttpStatus.OK);
+        return responseBuilder.success("User", "re-activated", userMapper.toDtoDetailed(reactivatedUser),
+                HttpStatus.OK);
     }
 }
 

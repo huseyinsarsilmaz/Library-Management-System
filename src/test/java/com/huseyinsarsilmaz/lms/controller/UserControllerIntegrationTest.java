@@ -618,7 +618,7 @@ class UserControllerIntegrationTest {
                                 });
 
                 assertEquals(deactivatedUser.getEmail(), apiResponse.getData().getEmail());
-                assertTrue(apiResponse.getData().isActive());
+                assertTrue(apiResponse.getData().getIsActive());
         }
 
 }

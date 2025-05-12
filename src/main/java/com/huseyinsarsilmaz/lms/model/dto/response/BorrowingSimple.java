@@ -18,13 +18,4 @@ public class BorrowingSimple {
     private LocalDate dueDate;
     private Borrowing.Status status;
 
-    public BorrowingSimple(Borrowing borrowing) {
-        this.id = borrowing.getId();
-        this.borrower = new UserSimple(borrowing.getBorrower());
-        this.book = new BookSimple(borrowing.getBook());
-        this.borrowDate = borrowing.getBorrowDate();
-        this.dueDate = borrowing.getDueDate();
-        this.status = borrowing.getStatus();
-
-    }
 }

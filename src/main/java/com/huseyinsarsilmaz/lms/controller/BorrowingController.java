@@ -21,6 +21,7 @@ import com.huseyinsarsilmaz.lms.model.dto.response.BorrowingSimple;
 import com.huseyinsarsilmaz.lms.model.dto.response.PagedResponse;
 import com.huseyinsarsilmaz.lms.model.entity.Borrowing;
 import com.huseyinsarsilmaz.lms.model.entity.User;
+import com.huseyinsarsilmaz.lms.model.mapper.BorrowingMapper;
 import com.huseyinsarsilmaz.lms.security.CurrentUser;
 import com.huseyinsarsilmaz.lms.service.BorrowingService;
 import com.huseyinsarsilmaz.lms.service.UserService;
@@ -36,6 +37,7 @@ public class BorrowingController {
     private final BorrowingService borrowingService;
     private final UserService userService;
     private final ResponseBuilder responseBuilder;
+    private final BorrowingMapper borrowingMapper;
 
     @PreAuthorize("hasRole('ROLE_LIBRARIAN')")
     @PostMapping
@@ -53,7 +55,8 @@ public class BorrowingController {
 
         Borrowing newBorrowing = borrowingService.create(req);
 
-        return responseBuilder.success("Borrowing", "created", new BorrowingSimple(newBorrowing), HttpStatus.CREATED);
+        return responseBuilder.success("Borrowing", "created", borrowingMapper.toDtoSimple(newBorrowing),
+                HttpStatus.CREATED);
     }
 
     @PostMapping("/{id}/return")
@@ -68,7 +71,8 @@ public class BorrowingController {
 
         borrowing = borrowingService.returnBorrowing(borrowing);
 
-        return responseBuilder.success("Borrowing", "returned", new BorrowingDetailed(borrowing), HttpStatus.OK);
+        return responseBuilder.success("Borrowing", "returned", borrowingMapper.toDtoDetailed(borrowing),
+                HttpStatus.OK);
     }
 
     @GetMapping("/my")
@@ -77,7 +81,7 @@ public class BorrowingController {
             @PageableDefault(size = 10, sort = "borrower") Pageable pageable) {
 
         Page<Borrowing> borrowings = borrowingService.getByBorrowerId(myUser.getId(), pageable);
-        Page<BorrowingSimple> page = borrowings.map(BorrowingDetailed::new);
+        Page<BorrowingSimple> page = borrowings.map(borrowingMapper::toDtoDetailed);
 
 
         return responseBuilder.success("Borrowing history", "fetched", new PagedResponse<>(page), HttpStatus.OK);
@@ -91,7 +95,7 @@ public class BorrowingController {
 
         User borrowedUser = userService.getById(id);
         Page<Borrowing> borrowings = borrowingService.getByBorrowerId(borrowedUser.getId(), pageable);
-        Page<BorrowingSimple> page = borrowings.map(BorrowingDetailed::new);
+        Page<BorrowingSimple> page = borrowings.map(borrowingMapper::toDtoDetailed);
 
         return responseBuilder.success("Borrowing history", "fetched", new PagedResponse<>(page), HttpStatus.OK);
     }
@@ -106,7 +110,7 @@ public class BorrowingController {
                 ? borrowingService.getAllOverdue(pageable)
                 : borrowingService.getOverdueByBorrowerId(borrowerId, pageable);
 
-        Page<BorrowingSimple> page = borrowings.map(BorrowingDetailed::new);
+        Page<BorrowingSimple> page = borrowings.map(borrowingMapper::toDtoDetailed);
 
         return responseBuilder.success("Borrowing overdue report", "acquired", new PagedResponse<>(page),
                 HttpStatus.OK);
@@ -121,7 +125,7 @@ public class BorrowingController {
 
         borrowing = borrowingService.excuseBorrowing(borrowing);
 
-        return responseBuilder.success("Borrowing", "excused", new BorrowingDetailed(borrowing), HttpStatus.OK);
+        return responseBuilder.success("Borrowing", "excused", borrowingMapper.toDtoDetailed(borrowing), HttpStatus.OK);
     }
 
 

@@ -1,7 +1,5 @@
 package com.huseyinsarsilmaz.lms.model.dto.response;
 
-import com.huseyinsarsilmaz.lms.model.entity.User;
-
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
@@ -11,11 +9,5 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class UserDetailed extends UserSimple {
 
-    private boolean isActive;
-
-    public UserDetailed(User user) {
-        super(user);
-        this.isActive = user.getIsActive();
-    }
-
+    private Boolean isActive;
 }

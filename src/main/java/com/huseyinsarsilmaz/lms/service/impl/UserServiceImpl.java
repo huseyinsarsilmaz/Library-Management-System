@@ -16,6 +16,7 @@ import com.huseyinsarsilmaz.lms.exception.NotFoundException;
 import com.huseyinsarsilmaz.lms.model.dto.request.RegisterRequest;
 import com.huseyinsarsilmaz.lms.model.dto.request.UserUpdateRequest;
 import com.huseyinsarsilmaz.lms.model.entity.User;
+import com.huseyinsarsilmaz.lms.model.mapper.UserMapper;
 import com.huseyinsarsilmaz.lms.repository.UserRepository;
 import com.huseyinsarsilmaz.lms.security.JwtService;
 import com.huseyinsarsilmaz.lms.service.UserService;
@@ -28,6 +29,7 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
+    private final UserMapper userMapper;
 
     public void isEmailTaken(String email) {
         if (userRepository.findByEmail(email).isPresent()) {
@@ -40,16 +42,7 @@ public class UserServiceImpl implements UserService {
         Set<String> roles = new HashSet<>();
         roles.add(User.Role.ROLE_PATRON.name());
 
-        User newUser = User.builder()
-                .email(req.getEmail())
-                .password(req.getPassword())
-                .name(req.getName())
-                .surname(req.getSurname())
-                .phoneNumber(req.getPhoneNumber())
-                .roles(String.join(",", roles))
-                .build();
-
-        return userRepository.save(newUser);
+        return userRepository.save(userMapper.toEntity(req));
     }
 
     public User getByEmail(String email) {
@@ -106,11 +99,7 @@ public class UserServiceImpl implements UserService {
     }
 
     public User update(User user, UserUpdateRequest req) {
-
-        user.setEmail(req.getEmail());
-        user.setName(req.getName());
-        user.setSurname(req.getSurname());
-        user.setPhoneNumber(req.getPhoneNumber());
+        userMapper.updateEntity(user, req);
 
         return userRepository.save(user);
     }

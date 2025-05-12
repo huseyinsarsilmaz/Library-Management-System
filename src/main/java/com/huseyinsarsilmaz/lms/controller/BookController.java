@@ -22,6 +22,7 @@ import com.huseyinsarsilmaz.lms.model.dto.response.ApiResponse;
 import com.huseyinsarsilmaz.lms.model.dto.response.BookSimple;
 import com.huseyinsarsilmaz.lms.model.dto.response.PagedResponse;
 import com.huseyinsarsilmaz.lms.model.entity.Book;
+import com.huseyinsarsilmaz.lms.model.mapper.BookMapper;
 import com.huseyinsarsilmaz.lms.service.BookService;
 import com.huseyinsarsilmaz.lms.util.ResponseBuilder;
 
@@ -33,9 +34,9 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class BookController {
 
-
     private final BookService bookService;
     private final ResponseBuilder responseBuilder;
+    private final BookMapper bookMapper;
 
     @PreAuthorize("hasRole('ROLE_LIBRARIAN')")
     @PostMapping
@@ -44,13 +45,13 @@ public class BookController {
         bookService.isIsbnTaken(req.getIsbn());
 
         Book newBook = bookService.create(req);
-        return responseBuilder.success("Book", "created", new BookSimple(newBook), HttpStatus.CREATED);
+        return responseBuilder.success("Book", "created", bookMapper.toDtoSimple(newBook), HttpStatus.CREATED);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<ApiResponse<BookSimple>> getById(@PathVariable long id) {
         Book book = bookService.getById(id);
-        return responseBuilder.success("Book", "fetched", new BookSimple(book), HttpStatus.OK);
+        return responseBuilder.success("Book", "fetched", bookMapper.toDtoSimple(book), HttpStatus.OK);
     }
 
     @PreAuthorize("hasRole('ROLE_LIBRARIAN')")
@@ -66,7 +67,7 @@ public class BookController {
         }
 
         Book updatedBook = bookService.update(book, req);
-        return responseBuilder.success("Book", "updated", new BookSimple(updatedBook), HttpStatus.OK);
+        return responseBuilder.success("Book", "updated", bookMapper.toDtoSimple(updatedBook), HttpStatus.OK);
     }
 
     @PreAuthorize("hasRole('ROLE_LIBRARIAN')")
@@ -76,7 +77,7 @@ public class BookController {
         Book book = bookService.getById(id);
         bookService.delete(book);
 
-        return responseBuilder.success("Book", "deleted", new BookSimple(book), HttpStatus.OK);
+        return responseBuilder.success("Book", "deleted", bookMapper.toDtoSimple(book), HttpStatus.OK);
     }
 
     @GetMapping("/search")
@@ -86,7 +87,7 @@ public class BookController {
             @PageableDefault(size = 10, sort = "title") Pageable pageable) {
 
         Page<BookSimple> results = bookService.searchBooks(type, query, pageable)
-                .map(BookSimple::new);
+                .map(bookMapper::toDtoSimple);
 
         return responseBuilder.success("Books", "fetched", new PagedResponse<>(results), HttpStatus.OK);
     }

@@ -12,6 +12,7 @@ import com.huseyinsarsilmaz.lms.exception.NotFoundException;
 import com.huseyinsarsilmaz.lms.model.dto.request.BookCreateRequest;
 import com.huseyinsarsilmaz.lms.model.dto.request.BookUpdateRequest;
 import com.huseyinsarsilmaz.lms.model.entity.Book;
+import com.huseyinsarsilmaz.lms.model.mapper.BookMapper;
 import com.huseyinsarsilmaz.lms.repository.BookRepository;
 import com.huseyinsarsilmaz.lms.service.BookService;
 
@@ -22,18 +23,11 @@ import lombok.RequiredArgsConstructor;
 public class BookServiceImpl implements BookService {
 
     private final BookRepository bookRepository;
+    private final BookMapper bookMapper;
 
     public Book create(BookCreateRequest req) {
-        Book newBook = Book.builder()
-                .title(req.getTitle())
-                .author(req.getAuthor())
-                .description(req.getDescription())
-                .isbn(req.getIsbn())
-                .publicationDate(req.getPublicationDate())
-                .genre(req.getGenre())
-                .build();
 
-        return bookRepository.save(newBook);
+        return bookRepository.save(bookMapper.toEntity(req));
     }
 
     public void isIsbnTaken(String isbn) {
@@ -52,13 +46,7 @@ public class BookServiceImpl implements BookService {
     }
 
     public Book update(Book book, BookUpdateRequest req) {
-
-        book.setTitle(req.getTitle());
-        book.setAuthor(req.getAuthor());
-        book.setDescription(req.getDescription());
-        book.setIsbn(req.getIsbn());
-        book.setPublicationDate(req.getPublicationDate());
-        book.setGenre(req.getGenre());
+        bookMapper.updateEntity(book, req);
 
         return bookRepository.save(book);
     }
