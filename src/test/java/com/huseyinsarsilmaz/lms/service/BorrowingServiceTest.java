@@ -35,6 +35,7 @@ import com.huseyinsarsilmaz.lms.model.dto.request.BorrowRequest;
 import com.huseyinsarsilmaz.lms.model.entity.Book;
 import com.huseyinsarsilmaz.lms.model.entity.Borrowing;
 import com.huseyinsarsilmaz.lms.model.entity.User;
+import com.huseyinsarsilmaz.lms.model.mapper.BorrowingMapper;
 import com.huseyinsarsilmaz.lms.repository.BorrowingRepository;
 import com.huseyinsarsilmaz.lms.service.impl.BorrowingServiceImpl;
 
@@ -43,12 +44,12 @@ public class BorrowingServiceTest {
 
     @Mock
     private BorrowingRepository borrowingRepository;
-
     @Mock
     private UserService userService;
-
     @Mock
     private BookService bookService;
+    @Mock
+    private BorrowingMapper borrowingMapper;
 
     @InjectMocks
     private BorrowingServiceImpl borrowingService;
@@ -58,7 +59,7 @@ public class BorrowingServiceTest {
     private Borrowing borrowing;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         user = new User();
         user.setId(1L);
         user.setIsActive(true);
@@ -72,7 +73,6 @@ public class BorrowingServiceTest {
                 .book(book)
                 .borrowDate(LocalDate.now().minusDays(10))
                 .dueDate(LocalDate.now().minusDays(3))
-                .returnDate(null)
                 .status(Borrowing.Status.BORROWED)
                 .build();
 
@@ -80,7 +80,7 @@ public class BorrowingServiceTest {
     }
 
     @Test
-    public void testCreate_whenNotAlreadyBorrowed() {
+    void testCreate_whenNotAlreadyBorrowed() {
         BorrowRequest req = new BorrowRequest();
         req.setBorrowerId(1L);
         req.setBookId(1L);
@@ -91,7 +91,7 @@ public class BorrowingServiceTest {
         when(bookService.getById(1L)).thenReturn(book);
         doNothing().when(bookService).checkAvailability(book);
         when(bookService.updateAvailability(book, false)).thenReturn(book);
-        when(borrowingRepository.save(any(Borrowing.class))).thenAnswer(inv -> inv.getArgument(0));
+        when(borrowingRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
 
         Borrowing result = borrowingService.create(req);
 
@@ -102,7 +102,7 @@ public class BorrowingServiceTest {
     }
 
     @Test
-    public void testCreate_whenAlreadyBorrowed() {
+    void testCreate_whenAlreadyBorrowed() {
         BorrowRequest req = new BorrowRequest();
         req.setBorrowerId(1L);
         req.setBookId(1L);
@@ -114,78 +114,77 @@ public class BorrowingServiceTest {
     }
 
     @Test
-    public void testGetById_whenExists() {
+    void testGetById_whenExists() {
         when(borrowingRepository.findByIdWithBookAndBorrower(1L)).thenReturn(Optional.of(borrowing));
 
-        Borrowing found = borrowingService.getById(1L);
+        Borrowing result = borrowingService.getById(1L);
 
-        assertNotNull(found);
-        assertEquals(1L, found.getId());
+        assertNotNull(result);
+        assertEquals(1L, result.getId());
     }
 
     @Test
-    public void testGetById_whenNotExists() {
+    void testGetById_whenNotExists() {
         when(borrowingRepository.findByIdWithBookAndBorrower(anyLong())).thenReturn(Optional.empty());
 
-        assertThrows(NotFoundException.class, () -> borrowingService.getById(Long.MAX_VALUE));
+        assertThrows(NotFoundException.class, () -> borrowingService.getById(99L));
     }
 
     @Test
-    public void testCheckOwnership_whenOwner() {
-
+    void testCheckOwnership_whenOwner() {
         assertDoesNotThrow(() -> borrowingService.checkOwnership(user, borrowing));
     }
 
     @Test
-    public void testCheckOwnership_whenNotOwner() {
-        User otherUser = new User();
-        otherUser.setId(2L);
+    void testCheckOwnership_whenNotOwner() {
+        User other = new User();
+        other.setId(99L);
 
-        assertThrows(ForbiddenException.class, () -> borrowingService.checkOwnership(otherUser, borrowing));
+        assertThrows(ForbiddenException.class, () -> borrowingService.checkOwnership(other, borrowing));
     }
 
     @Test
-    public void testCheckReturnable_whenAlreadyReturned() {
+    void testCheckReturnable_whenAlreadyReturned() {
         borrowing.setStatus(Borrowing.Status.RETURNED_TIMELY);
 
         assertThrows(AlreadyReturnedBorrowingException.class, () -> borrowingService.checkReturnable(borrowing));
     }
 
     @Test
-    public void testCheckReturnable_whenNotReturned() {
-
+    void testCheckReturnable_whenNotReturned() {
         assertDoesNotThrow(() -> borrowingService.checkReturnable(borrowing));
     }
 
     @Test
-    public void testReturnBorrowing_whenTimely() {
+    void testReturnBorrowing_whenTimely() {
         borrowing.setDueDate(LocalDate.now().plusDays(1));
 
         when(bookService.updateAvailability(book, true)).thenReturn(book);
         when(borrowingRepository.save(borrowing)).thenReturn(borrowing);
 
-        Borrowing returned = borrowingService.returnBorrowing(borrowing);
+        Borrowing result = borrowingService.returnBorrowing(borrowing);
 
-        assertNotNull(returned.getReturnDate());
-        assertEquals(Borrowing.Status.RETURNED_TIMELY, returned.getStatus());
+        assertNotNull(result.getReturnDate());
+        assertEquals(Borrowing.Status.RETURNED_TIMELY, result.getStatus());
         assertTrue(book.getIsAvailable());
     }
 
     @Test
-    public void testReturnBorrowing_whenOverdueAndNotSuspended() {
+    void testReturnBorrowing_whenOverdueAndNotSuspended() {
         when(borrowingRepository.countByBorrowerIdAndStatus(user.getId(), Borrowing.Status.OVERDUE)).thenReturn(1L);
         when(bookService.updateAvailability(book, true)).thenReturn(book);
         when(borrowingRepository.save(borrowing)).thenReturn(borrowing);
 
-        Borrowing returned = borrowingService.returnBorrowing(borrowing);
+        Borrowing result = borrowingService.returnBorrowing(borrowing);
 
-        assertEquals(Borrowing.Status.RETURNED_OVERDUE, returned.getStatus());
+        assertEquals(Borrowing.Status.RETURNED_OVERDUE, result.getStatus());
         verify(userService, never()).changeActive(user, false);
     }
 
     @Test
-    public void testReturnBorrowing_whenOverdueAndSuspended() {
+    void testReturnBorrowing_whenOverdueAndSuspended() {
         book.setIsAvailable(false);
+
         when(borrowingRepository.countByBorrowerIdAndStatus(user.getId(), Borrowing.Status.OVERDUE)).thenReturn(2L);
         when(bookService.updateAvailability(book, true)).thenAnswer(inv -> {
             book.setIsAvailable(true);
@@ -193,46 +192,46 @@ public class BorrowingServiceTest {
         });
         when(borrowingRepository.save(borrowing)).thenReturn(borrowing);
 
-        Borrowing returned = borrowingService.returnBorrowing(borrowing);
+        Borrowing result = borrowingService.returnBorrowing(borrowing);
 
-        assertEquals(Borrowing.Status.RETURNED_OVERDUE, returned.getStatus());
-        verify(userService).changeActive(user, false);
-        assertNotNull(returned.getReturnDate());
+        assertEquals(Borrowing.Status.RETURNED_OVERDUE, result.getStatus());
         assertTrue(book.getIsAvailable());
-
+        assertNotNull(result.getReturnDate());
+        verify(userService).changeActive(user, false);
     }
 
     @Test
-    public void testGetByBorrowerId() {
-        Page<Borrowing> mockPage = new PageImpl<>(List.of(borrowing));
-        when(borrowingRepository.findAllByBorrowerIdWithBook(1L, Pageable.ofSize(10))).thenReturn(mockPage);
+    void testGetByBorrowerId() {
+        Page<Borrowing> page = new PageImpl<>(List.of(borrowing));
+        Pageable pageable = Pageable.ofSize(10);
 
-    Page<Borrowing> page = borrowingService.getByBorrowerId(1L, Pageable.ofSize(10));
+        when(borrowingRepository.findAllByBorrowerIdWithBook(1L, pageable)).thenReturn(page);
 
-        assertEquals(1, page.getContent().size());
-        assertEquals(borrowing, page.getContent().get(0));
+        Page<Borrowing> result = borrowingService.getByBorrowerId(1L, pageable);
+
+        assertEquals(1, result.getContent().size());
+        assertEquals(borrowing, result.getContent().get(0));
     }
 
     @Test
-    public void testCheckUserHasActiveBorrowings_whenHas() {
+    void testCheckUserHasActiveBorrowings_whenHas() {
         when(borrowingRepository.countByBorrowerIdAndStatusIn(anyLong(), anyList())).thenReturn(1L);
 
         assertThrows(HasActiveBorrowingsException.class, () -> borrowingService.checkUserHasActiveBorrowings(user));
     }
 
     @Test
-    public void testCheckUserHasActiveBorrowings_whenHasNot() {
+    void testCheckUserHasActiveBorrowings_whenHasNot() {
         when(borrowingRepository.countByBorrowerIdAndStatusIn(anyLong(), anyList())).thenReturn(0L);
 
         assertDoesNotThrow(() -> borrowingService.checkUserHasActiveBorrowings(user));
     }
 
     @Test
-    public void testGetOverdueByBorrowerId() {
+    void testGetOverdueByBorrowerId() {
         Page<Borrowing> page = new PageImpl<>(List.of(borrowing));
 
-        when(borrowingRepository.findAllByBorrowerIdAndStatusNotIn(eq(1L), anyList(), any(Pageable.class)))
-                .thenReturn(page);
+        when(borrowingRepository.findAllByBorrowerIdAndStatusNotIn(eq(1L), anyList(), any())).thenReturn(page);
 
         Page<Borrowing> result = borrowingService.getOverdueByBorrowerId(1L, Pageable.unpaged());
 
@@ -240,10 +239,10 @@ public class BorrowingServiceTest {
     }
 
     @Test
-    public void testGetAllOverdue() {
+    void testGetAllOverdue() {
         Page<Borrowing> page = new PageImpl<>(List.of(borrowing));
 
-        when(borrowingRepository.findAllByStatusNotIn(anyList(), any(Pageable.class))).thenReturn(page);
+        when(borrowingRepository.findAllByStatusNotIn(anyList(), any())).thenReturn(page);
 
         Page<Borrowing> result = borrowingService.getAllOverdue(Pageable.unpaged());
 
@@ -251,22 +250,21 @@ public class BorrowingServiceTest {
     }
 
     @Test
-    public void testCheckBorrowableByBorrowerId_whenOverdue() {
-        when(borrowingRepository.existsByBorrowerIdAndStatus(anyLong(), eq(Borrowing.Status.OVERDUE))).thenReturn(true);
+    void testCheckBorrowableByBorrowerId_whenOverdue() {
+        when(borrowingRepository.existsByBorrowerIdAndStatus(1L, Borrowing.Status.OVERDUE)).thenReturn(true);
 
         assertThrows(OverdueException.class, () -> borrowingService.checkBorrowableByBorrowerId(1L));
     }
 
     @Test
-    public void testCheckBorrowableByBorrowerId_whenBorrowable() {
-        when(borrowingRepository.existsByBorrowerIdAndStatus(anyLong(), eq(Borrowing.Status.OVERDUE)))
-                .thenReturn(false);
+    void testCheckBorrowableByBorrowerId_whenBorrowable() {
+        when(borrowingRepository.existsByBorrowerIdAndStatus(1L, Borrowing.Status.OVERDUE)).thenReturn(false);
 
         assertDoesNotThrow(() -> borrowingService.checkBorrowableByBorrowerId(1L));
     }
 
     @Test
-    public void testExcuseReturnedOverdueBorrowings() {
+    void testExcuseReturnedOverdueBorrowings() {
         borrowing.setStatus(Borrowing.Status.RETURNED_OVERDUE);
 
         when(borrowingRepository.findByBorrowerIdAndStatus(1L, Borrowing.Status.RETURNED_OVERDUE))
@@ -279,7 +277,7 @@ public class BorrowingServiceTest {
     }
 
     @Test
-    public void testExcuseBorrowing() {
+    void testExcuseBorrowing() {
         borrowing.setStatus(Borrowing.Status.RETURNED_OVERDUE);
 
         when(borrowingRepository.save(borrowing)).thenReturn(borrowing);
@@ -290,21 +288,21 @@ public class BorrowingServiceTest {
     }
 
     @Test
-    public void testCheckExcusable_whenNotExcusable() {
+    void testCheckExcusable_whenNotExcusable() {
         borrowing.setStatus(Borrowing.Status.RETURNED_TIMELY);
 
         assertThrows(BorrowingNotExcusableException.class, () -> borrowingService.checkExcusable(borrowing));
     }
 
     @Test
-    public void testCheckExcusable_whenExcusable() {
+    void testCheckExcusable_whenExcusable() {
         borrowing.setStatus(Borrowing.Status.RETURNED_OVERDUE);
 
         assertDoesNotThrow(() -> borrowingService.checkExcusable(borrowing));
     }
 
     @Test
-    public void testMarkOverdueBorrowings() {
+    void testMarkOverdueBorrowings() {
         when(borrowingRepository.findPastDueByStatus(Borrowing.Status.BORROWED, LocalDate.now()))
                 .thenReturn(List.of(borrowing));
 

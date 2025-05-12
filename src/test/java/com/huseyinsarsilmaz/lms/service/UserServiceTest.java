@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 import java.util.Optional;
@@ -20,15 +21,21 @@ import com.huseyinsarsilmaz.lms.exception.AlreadyExistsException;
 import com.huseyinsarsilmaz.lms.exception.ForbiddenException;
 import com.huseyinsarsilmaz.lms.exception.NotFoundException;
 import com.huseyinsarsilmaz.lms.exception.UserNotDeactivatedException;
+import com.huseyinsarsilmaz.lms.exception.UserPromotionException;
 import com.huseyinsarsilmaz.lms.model.dto.request.RegisterRequest;
 import com.huseyinsarsilmaz.lms.model.dto.request.UserUpdateRequest;
 import com.huseyinsarsilmaz.lms.model.entity.User;
+import com.huseyinsarsilmaz.lms.model.mapper.UserMapper;
 import com.huseyinsarsilmaz.lms.repository.UserRepository;
 import com.huseyinsarsilmaz.lms.security.JwtService;
 import com.huseyinsarsilmaz.lms.service.impl.UserServiceImpl;
 
 @ExtendWith(MockitoExtension.class)
 public class UserServiceTest {
+
+    private static final String EMAIL = "huseyinsarsilmaz@hotmail.com";
+    private static final String ENCODED_PASSWORD = "MTIzNDU2Nzg=";
+    private static final Long USER_ID = 1L;
 
     @Mock
     private UserRepository userRepository;
@@ -39,6 +46,9 @@ public class UserServiceTest {
     @Mock
     private JwtService jwtService;
 
+    @Mock
+    private UserMapper userMapper;
+
     @InjectMocks
     private UserServiceImpl userService;
 
@@ -47,9 +57,9 @@ public class UserServiceTest {
     @BeforeEach
     public void setUp() {
         user = new User();
-        user.setId(1L);
-        user.setEmail("huseyinsarsilmaz@hotmail.com");
-        user.setPassword("MTIzNDU2Nzg=");
+        user.setId(USER_ID);
+        user.setEmail(EMAIL);
+        user.setPassword(ENCODED_PASSWORD);
         user.setRoles("ROLE_PATRON");
         user.setName("Hüseyin");
         user.setSurname("Sarsılmaz");
@@ -57,62 +67,67 @@ public class UserServiceTest {
 
     @Test
     public void testIsEmailTaken_whenEmailExists() {
-        when(userRepository.findByEmail(anyString()))
-                .thenReturn(Optional.of(user));
-
-        assertThrows(AlreadyExistsException.class, () -> userService.isEmailTaken("huseyinsarsilmaz@hotmail.com"));
+        when(userRepository.findByEmail(eq(EMAIL))).thenReturn(Optional.of(user));
+        assertThrows(AlreadyExistsException.class, () -> userService.isEmailTaken(EMAIL));
     }
 
     @Test
     public void testIsEmailTaken_whenEmailNotExists() {
-        when(userRepository.findByEmail(anyString())).thenReturn(Optional.empty());
-
+        when(userRepository.findByEmail(eq("testnotexist@hotmail.com"))).thenReturn(Optional.empty());
         assertDoesNotThrow(() -> userService.isEmailTaken("testnotexist@hotmail.com"));
     }
 
     @Test
     public void testRegister() {
         RegisterRequest req = new RegisterRequest();
-        req.setEmail("huseyinsarsilmaz@hotmail.com");
+        req.setEmail(EMAIL);
         req.setPassword("12345678");
         req.setName("Hüseyin");
         req.setSurname("Sarsılmaz");
 
-        when(passwordEncoder.encode(anyString())).thenReturn("MTIzNDU2Nzg=");
+        User mappedUser = new User();
+        mappedUser.setEmail(req.getEmail());
+        mappedUser.setName(req.getName());
+        mappedUser.setSurname(req.getSurname());
+        mappedUser.setPassword(ENCODED_PASSWORD);
+
+        when(userMapper.toEntity(eq(req))).thenReturn(mappedUser);
+
+        when(passwordEncoder.encode(anyString())).thenReturn(ENCODED_PASSWORD);
         when(userRepository.save(any(User.class))).thenReturn(user);
 
         User savedUser = userService.register(req);
-        assertNotNull(savedUser);
 
+        assertNotNull(savedUser);
         assertEquals(req.getEmail(), savedUser.getEmail());
         assertEquals(req.getName(), savedUser.getName());
         assertEquals(req.getSurname(), savedUser.getSurname());
-
+        verify(userRepository).save(any(User.class));
     }
 
     @Test
     public void testGetByEmail_whenUserExists() {
-        when(userRepository.findByEmail(anyString())).thenReturn(Optional.of(user));
+        when(userRepository.findByEmail(eq(EMAIL))).thenReturn(Optional.of(user));
 
-        User result = userService.getByEmail("huseyinsarsilmaz@hotmail.com");
+        User result = userService.getByEmail(EMAIL);
         assertNotNull(result);
-        assertEquals("huseyinsarsilmaz@hotmail.com", result.getEmail());
+        assertEquals(EMAIL, result.getEmail());
     }
 
     @Test
     public void testGetByEmail_whenUserNotFound() {
-        when(userRepository.findByEmail(anyString())).thenReturn(Optional.empty());
+        when(userRepository.findByEmail(eq("testnotexist@hotmail.com"))).thenReturn(Optional.empty());
 
         assertThrows(NotFoundException.class, () -> userService.getByEmail("testnotexist@hotmail.com"));
     }
 
     @Test
     public void testGetById_whenUserExists() {
-        when(userRepository.findById(anyLong())).thenReturn(Optional.of(user));
+        when(userRepository.findById(eq(USER_ID))).thenReturn(Optional.of(user));
 
-        User result = userService.getById(1);
+        User result = userService.getById(USER_ID);
         assertNotNull(result);
-        assertEquals(1L, result.getId());
+        assertEquals(USER_ID, result.getId());
     }
 
     @Test
@@ -124,27 +139,21 @@ public class UserServiceTest {
 
     @Test
     public void testPromote_whenNewRoleIsAdmin() {
-
-        assertThrows(ForbiddenException.class, () -> userService.promote(user, User.Role.ROLE_ADMIN));
+        assertThrows(UserPromotionException.class, () -> userService.promote(user, User.Role.ROLE_ADMIN));
         verify(userRepository, never()).save(any(User.class));
-
     }
 
     @Test
     public void testPromote_whenNewRoleIsPatron() {
-
-        User promotedUser = userService.promote(user, User.Role.ROLE_PATRON);
-        assertEquals(user, promotedUser);
+        assertThrows(UserPromotionException.class, () -> userService.promote(user, User.Role.ROLE_PATRON));
         verify(userRepository, never()).save(any(User.class));
     }
 
     @Test
     public void testPromote_whenRoleAlreadyExists() {
-
         user.setRoles("ROLE_PATRON,ROLE_LIBRARIAN");
 
-        User promotedUser = userService.promote(user, User.Role.ROLE_LIBRARIAN);
-        assertEquals(user, promotedUser);
+        assertThrows(UserPromotionException.class, () -> userService.promote(user, User.Role.ROLE_LIBRARIAN));
         verify(userRepository, never()).save(any(User.class));
     }
 
@@ -161,18 +170,15 @@ public class UserServiceTest {
         verify(userRepository).save(user);
     }
 
-
     @Test
-    public void testcheckHasRole_whenRoleMatches() {
+    public void testCheckHasRole_whenRoleMatches() {
         user.setRoles("ROLE_PATRON,ROLE_LIBRARIAN");
-
         assertDoesNotThrow(() -> userService.checkHasRole(user, User.Role.ROLE_PATRON));
     }
 
     @Test
-    public void testcheckHasRole_whenRoleDoesNotMatch() {
+    public void testCheckHasRole_whenRoleDoesNotMatch() {
         user.setRoles("ROLE_PATRON");
-
         assertThrows(ForbiddenException.class, () -> userService.checkHasRole(user, User.Role.ROLE_LIBRARIAN));
     }
 
@@ -183,6 +189,16 @@ public class UserServiceTest {
         req.setName("Hüseyin2");
         req.setSurname("Sarsılmaz2");
         req.setPhoneNumber("123456789");
+
+        doAnswer(invocation -> {
+            User userArg = invocation.getArgument(0);
+            UserUpdateRequest reqArg = invocation.getArgument(1);
+            userArg.setEmail(reqArg.getEmail());
+            userArg.setName(reqArg.getName());
+            userArg.setSurname(reqArg.getSurname());
+            userArg.setPhoneNumber(reqArg.getPhoneNumber());
+            return null;
+        }).when(userMapper).updateEntity(eq(user), eq(req));
 
         when(userRepository.save(any(User.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
@@ -197,7 +213,7 @@ public class UserServiceTest {
 
     @Test
     public void testDelete() {
-        doNothing().when(userRepository).delete(any(User.class));
+        doNothing().when(userRepository).delete(eq(user));
 
         assertDoesNotThrow(() -> userService.delete(user));
         verify(userRepository).delete(user);
@@ -209,24 +225,24 @@ public class UserServiceTest {
         when(userRepository.save(any(User.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         User updatedUser = userService.changeActive(user, true);
+
         assertTrue(updatedUser.getIsActive());
         verify(userRepository).save(user);
     }
 
     @Test
     public void testCheckDeactivated_whenUserIsDeactivated() {
-        when(userRepository.existsByIdAndIsActiveFalse(user.getId())).thenReturn(true);
+        when(userRepository.existsByIdAndIsActiveFalse(eq(USER_ID))).thenReturn(true);
 
         assertDoesNotThrow(() -> userService.checkDeactivated(user));
-        verify(userRepository).existsByIdAndIsActiveFalse(user.getId());
+        verify(userRepository).existsByIdAndIsActiveFalse(USER_ID);
     }
 
     @Test
     public void testCheckDeactivated_whenUserIsNotDeactivated() {
-        when(userRepository.existsByIdAndIsActiveFalse(user.getId())).thenReturn(false);
+        when(userRepository.existsByIdAndIsActiveFalse(eq(USER_ID))).thenReturn(false);
 
         assertThrows(UserNotDeactivatedException.class, () -> userService.checkDeactivated(user));
-        verify(userRepository).existsByIdAndIsActiveFalse(user.getId());
+        verify(userRepository).existsByIdAndIsActiveFalse(USER_ID);
     }
-
 }
