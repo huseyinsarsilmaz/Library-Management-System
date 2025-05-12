@@ -39,7 +39,6 @@ public class BorrowingController {
     private final ResponseBuilder responseBuilder;
     private final BorrowingMapper borrowingMapper;
 
-    @PreAuthorize("hasRole('ROLE_LIBRARIAN')")
     @PostMapping
     public ResponseEntity<ApiResponse<BorrowingSimple>> createBorrowing(
             @CurrentUser User myUser,
@@ -83,34 +82,37 @@ public class BorrowingController {
         Page<Borrowing> borrowings = borrowingService.getByBorrowerId(myUser.getId(), pageable);
         Page<BorrowingSimple> page = borrowings.map(borrowingMapper::toDtoDetailed);
 
-
         return responseBuilder.success("Borrowing history", "fetched", new PagedResponse<>(page), HttpStatus.OK);
     }
 
     @PreAuthorize("hasRole('ROLE_LIBRARIAN')")
     @GetMapping("/user/{id}")
-    public ResponseEntity<ApiResponse<PagedResponse<BorrowingSimple>>> getBorrowingHistory(
+    public ResponseEntity<ApiResponse<PagedResponse<BorrowingDetailed>>> getBorrowingHistory(
             @PathVariable("id") long id,
             @PageableDefault(size = 10, sort = "borrower") Pageable pageable) {
 
         User borrowedUser = userService.getById(id);
         Page<Borrowing> borrowings = borrowingService.getByBorrowerId(borrowedUser.getId(), pageable);
-        Page<BorrowingSimple> page = borrowings.map(borrowingMapper::toDtoDetailed);
+        Page<BorrowingDetailed> page = borrowings.map(borrowingMapper::toDtoDetailed);
 
         return responseBuilder.success("Borrowing history", "fetched", new PagedResponse<>(page), HttpStatus.OK);
     }
 
     @PreAuthorize("hasRole('ROLE_LIBRARIAN')")
     @GetMapping("/report")
-    public ResponseEntity<ApiResponse<PagedResponse<BorrowingSimple>>> getBorrowingReport(
+    public ResponseEntity<ApiResponse<PagedResponse<BorrowingDetailed>>> getBorrowingReport(
             @RequestParam(required = false) Long borrowerId,
             @PageableDefault(size = 10, sort = "borrower") Pageable pageable) {
 
-        Page<Borrowing> borrowings = (borrowerId == null)
-                ? borrowingService.getAllOverdue(pageable)
-                : borrowingService.getOverdueByBorrowerId(borrowerId, pageable);
+        Page<Borrowing> borrowings;
+        if (borrowerId == null) {
+            borrowings = borrowingService.getAllOverdue(pageable);
+        } else {
+            User reportUser = userService.getById(borrowerId);
+            borrowings = borrowingService.getOverdueByBorrowerId(reportUser.getId(), pageable);
+        }
 
-        Page<BorrowingSimple> page = borrowings.map(borrowingMapper::toDtoDetailed);
+        Page<BorrowingDetailed> page = borrowings.map(borrowingMapper::toDtoDetailed);
 
         return responseBuilder.success("Borrowing overdue report", "acquired", new PagedResponse<>(page),
                 HttpStatus.OK);
@@ -127,6 +129,5 @@ public class BorrowingController {
 
         return responseBuilder.success("Borrowing", "excused", borrowingMapper.toDtoDetailed(borrowing), HttpStatus.OK);
     }
-
 
 }

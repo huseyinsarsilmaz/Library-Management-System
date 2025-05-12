@@ -57,12 +57,17 @@ class BorrowingControllerIntegrationTest {
         private final ObjectMapper objectMapper = new ObjectMapper()
                         .registerModule(new JavaTimeModule())
                         .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+
         private String baseUrl;
 
         private User patronUser;
         private User librarianUser;
         private Book borrowedBook;
         private Borrowing borrowing;
+
+        private static final String PATRON_EMAIL = "huseyinsarsilmaz@hotmail.com";
+        private static final String LIBRARIAN_EMAIL = "huseyinsarsilmaz2@hotmail.com";
+        private static final String NON_EXISTENT_EMAIL = "huseyinsarsilmaz3@hotmail.com";
 
         private String toJson(Object obj) {
                 try {
@@ -80,23 +85,37 @@ class BorrowingControllerIntegrationTest {
                 return new HttpEntity<>(json, headers);
         }
 
+        private HttpEntity<String> authEntity(String email) {
+                return createEntity(null, email);
+        }
+
         @BeforeEach
         void setUp() {
                 baseUrl = "http://localhost:" + port + "/api/borrowings";
+                configureRestTemplate();
+                clearDatabase();
+                createUsers();
+                createBorrowedBookAndBorrowing();
+        }
 
+        private void configureRestTemplate() {
                 restTemplate.setErrorHandler(new DefaultResponseErrorHandler() {
                         @Override
                         public boolean hasError(@NonNull ClientHttpResponse response) throws IOException {
                                 return false;
                         }
                 });
+        }
 
+        private void clearDatabase() {
                 borrowingRepository.deleteAll();
                 bookRepository.deleteAll();
                 userRepository.deleteAll();
+        }
 
+        private void createUsers() {
                 patronUser = userRepository.save(User.builder()
-                                .email("patron@example.com")
+                                .email(PATRON_EMAIL)
                                 .password("password")
                                 .roles("ROLE_PATRON")
                                 .phoneNumber("1111111111")
@@ -106,7 +125,7 @@ class BorrowingControllerIntegrationTest {
                                 .build());
 
                 librarianUser = userRepository.save(User.builder()
-                                .email("librarian@example.com")
+                                .email(LIBRARIAN_EMAIL)
                                 .password("password")
                                 .roles("ROLE_LIBRARIAN")
                                 .phoneNumber("2222222222")
@@ -114,7 +133,9 @@ class BorrowingControllerIntegrationTest {
                                 .surname("User")
                                 .isActive(true)
                                 .build());
+        }
 
+        private void createBorrowedBookAndBorrowing() {
                 borrowedBook = bookRepository.save(Book.builder()
                                 .isbn("1234567890123")
                                 .title("Book Title")
@@ -132,157 +153,62 @@ class BorrowingControllerIntegrationTest {
                                 .build());
         }
 
+        private ResponseEntity<String> sendRequest(String path, HttpMethod method, HttpEntity<String> entity) {
+                return restTemplate.exchange(baseUrl + path, method, entity, String.class);
+        }
+
         @Test
         void testGetMyBorrowingHistory_whenUserNotExists() {
-                HttpEntity<String> entity = createEntity(null, "nonexistent@hotmail.com");
-
-                ResponseEntity<String> response = restTemplate.exchange(
-                                baseUrl + "/my",
-                                HttpMethod.GET,
-                                entity,
-                                String.class);
+                HttpEntity<String> entity = authEntity(NON_EXISTENT_EMAIL);
+                ResponseEntity<String> response = sendRequest("/my", HttpMethod.GET, entity);
 
                 assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
         }
 
         @Test
         void testGetMyBorrowingHistory_whenUserExists() throws JsonProcessingException {
-                HttpEntity<String> entity = createEntity(null, patronUser.getEmail());
-
-                ResponseEntity<String> response = restTemplate.exchange(
-                                baseUrl + "/my",
-                                HttpMethod.GET,
-                                entity,
-                                String.class);
-
+                HttpEntity<String> entity = authEntity(PATRON_EMAIL);
+                ResponseEntity<String> response = sendRequest("/my", HttpMethod.GET, entity);
                 assertEquals(HttpStatus.OK, response.getStatusCode());
 
-                // ApiResponse<BorrowingHistory> apiResponse = objectMapper.readValue(
-                // response.getBody(),
-                // new TypeReference<ApiResponse<BorrowingHistory>>() {
-                // });
+                ApiResponse<PagedResponse<BorrowingDetailed>> apiResponse = objectMapper.readValue(response.getBody(),
+                                new TypeReference<>() {
+                                });
 
-                // assertNotNull(apiResponse.getData());
-                // assertEquals(1, apiResponse.getData().getActive().size());
-                // assertEquals(borrowedBook.getTitle(),
-                // apiResponse.getData().getActive().get(0).getBook().getTitle());
+                assertNotNull(apiResponse.getData());
+                assertEquals(1, apiResponse.getData().getItems().size());
+                assertEquals(borrowedBook.getTitle(), apiResponse.getData().getItems().get(0).getBook().getTitle());
         }
 
         @Test
         void testGetBorrowingHistory_whenMyUserNotExists() {
-                HttpEntity<String> entity = createEntity(null, "nonexistent@example.com");
-
-                ResponseEntity<String> response = restTemplate.exchange(
-                                baseUrl + "/user/" + patronUser.getId(),
-                                HttpMethod.GET,
-                                entity,
-                                String.class);
+                HttpEntity<String> entity = authEntity(NON_EXISTENT_EMAIL);
+                ResponseEntity<String> response = sendRequest("/user/" + patronUser.getId(), HttpMethod.GET, entity);
 
                 assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
         }
 
         @Test
         void testGetBorrowingHistory_whenUserRoleIsNotLibrarian() {
-                HttpEntity<String> entity = createEntity(null, patronUser.getEmail());
-
-                ResponseEntity<String> response = restTemplate.exchange(
-                                baseUrl + "/user/" + patronUser.getId(),
-                                HttpMethod.GET,
-                                entity,
-                                String.class);
+                HttpEntity<String> entity = authEntity(PATRON_EMAIL);
+                ResponseEntity<String> response = sendRequest("/user/" + patronUser.getId(), HttpMethod.GET, entity);
 
                 assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
         }
 
         @Test
         void testGetBorrowingHistory_whenBorrowedUserNotExists() {
-                HttpEntity<String> entity = createEntity(null, librarianUser.getEmail());
-
-                ResponseEntity<String> response = restTemplate.exchange(
-                                baseUrl + "/user/99999",
-                                HttpMethod.GET,
-                                entity,
-                                String.class);
+                HttpEntity<String> entity = authEntity(LIBRARIAN_EMAIL);
+                ResponseEntity<String> response = sendRequest("/user/99999" + patronUser.getId(), HttpMethod.GET,
+                                entity);
 
                 assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
         }
 
         @Test
         void testGetBorrowingHistory_whenRequestIsValid() throws JsonProcessingException {
-                HttpEntity<String> entity = createEntity(null, librarianUser.getEmail());
-
-                ResponseEntity<String> response = restTemplate.exchange(
-                                baseUrl + "/user/" + patronUser.getId(),
-                                HttpMethod.GET,
-                                entity,
-                                String.class);
-
-                assertEquals(HttpStatus.OK, response.getStatusCode());
-
-                // ApiResponse<BorrowingHistory> apiResponse = objectMapper.readValue(
-                // response.getBody(),
-                // new TypeReference<ApiResponse<BorrowingHistory>>() {
-                // });
-
-                // assertNotNull(apiResponse.getData());
-                // assertEquals(1, apiResponse.getData().getActive().size());
-                // assertEquals(borrowedBook.getTitle(),
-                // apiResponse.getData().getActive().get(0).getBook().getTitle());
-        }
-
-        @Test
-        void testGetBorrowingReport_whenUserNotExists() {
-                HttpEntity<String> entity = createEntity(null, "nonexistent@example.com");
-
-                ResponseEntity<String> response = restTemplate.exchange(
-                                baseUrl + "/report?borrowerId=" + patronUser.getId(),
-                                HttpMethod.GET,
-                                entity,
-                                String.class);
-
-                assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
-        }
-
-        @Test
-        void testGetBorrowingReport_whenUserRoleIsNotLibrarian() {
-                HttpEntity<String> entity = createEntity(null, patronUser.getEmail());
-
-                ResponseEntity<String> response = restTemplate.exchange(
-                                baseUrl + "/report?borrowerId=" + patronUser.getId(),
-                                HttpMethod.GET,
-                                entity,
-                                String.class);
-
-                assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
-        }
-
-        @Test
-        void testGetBorrowingReport_whenBorrowerIdGivenButUserNotExists() {
-                HttpEntity<String> entity = createEntity(null, librarianUser.getEmail());
-
-                ResponseEntity<String> response = restTemplate.exchange(
-                                baseUrl + "/report?borrowerId=99999",
-                                HttpMethod.GET,
-                                entity,
-                                String.class);
-
-                assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
-        }
-
-        @Test
-        void testGetBorrowingReport_whenBorrowerIdGivenAndValid() throws JsonProcessingException {
-                borrowing.setStatus(Borrowing.Status.RETURNED_OVERDUE);
-                borrowing.setReturnDate(LocalDate.now());
-
-                borrowingRepository.save(borrowing);
-
-                HttpEntity<String> entity = createEntity(null, librarianUser.getEmail());
-
-                ResponseEntity<String> response = restTemplate.exchange(
-                                baseUrl + "/report?borrowerId=" + patronUser.getId(),
-                                HttpMethod.GET,
-                                entity,
-                                String.class);
+                HttpEntity<String> entity = authEntity(LIBRARIAN_EMAIL);
+                ResponseEntity<String> response = sendRequest("/user/" + patronUser.getId(), HttpMethod.GET, entity);
 
                 assertEquals(HttpStatus.OK, response.getStatusCode());
 
@@ -297,16 +223,62 @@ class BorrowingControllerIntegrationTest {
         }
 
         @Test
+        void testGetBorrowingReport_whenUserNotExists() {
+                HttpEntity<String> entity = authEntity(NON_EXISTENT_EMAIL);
+                ResponseEntity<String> response = sendRequest("/report?borrowerId=" + patronUser.getId(),
+                                HttpMethod.GET, entity);
+
+                assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
+        }
+
+        @Test
+        void testGetBorrowingReport_whenUserRoleIsNotLibrarian() {
+                HttpEntity<String> entity = authEntity(PATRON_EMAIL);
+                ResponseEntity<String> response = sendRequest("/report?borrowerId=" + patronUser.getId(),
+                                HttpMethod.GET, entity);
+                assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
+        }
+
+        @Test
+        void testGetBorrowingReport_whenBorrowerIdGivenButUserNotExists() {
+                HttpEntity<String> entity = authEntity(LIBRARIAN_EMAIL);
+                ResponseEntity<String> response = sendRequest("/report?borrowerId=99999",
+                                HttpMethod.GET, entity);
+
+                assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+        }
+
+        @Test
+        void testGetBorrowingReport_whenBorrowerIdGivenAndValid() throws JsonProcessingException {
+                borrowing.setStatus(Borrowing.Status.RETURNED_OVERDUE);
+                borrowing.setReturnDate(LocalDate.now());
+                borrowingRepository.save(borrowing);
+
+                HttpEntity<String> entity = authEntity(LIBRARIAN_EMAIL);
+                ResponseEntity<String> response = sendRequest("/report?borrowerId=" + patronUser.getId(),
+                                HttpMethod.GET, entity);
+
+                assertEquals(HttpStatus.OK, response.getStatusCode());
+
+                ApiResponse<PagedResponse<BorrowingDetailed>> apiResponse = objectMapper.readValue(response.getBody(),
+                                new TypeReference<>() {
+                                });
+
+                assertNotNull(apiResponse.getData());
+                assertEquals(1, apiResponse.getData().getItems().size());
+                assertEquals(borrowedBook.getTitle(), apiResponse.getData().getItems().get(0).getBook().getTitle());
+        }
+
+        @Test
         void testGetBorrowingReport_whenBorrowerIdNotGiven() throws JsonProcessingException {
                 borrowing.setStatus(Borrowing.Status.RETURNED_OVERDUE);
                 borrowing.setReturnDate(LocalDate.now());
-
                 borrowingRepository.save(borrowing);
 
                 Book newBook = bookRepository.save(Book.builder()
                                 .isbn("1234567890124")
                                 .title("New Book")
-                                .author("New Authjor")
+                                .author("New Author")
                                 .isAvailable(false)
                                 .build());
 
@@ -315,24 +287,18 @@ class BorrowingControllerIntegrationTest {
                                 .borrower(librarianUser)
                                 .borrowDate(LocalDate.now().minusDays(5))
                                 .dueDate(LocalDate.now().plusDays(5))
-                                .returnDate(LocalDate.now())
                                 .status(Borrowing.Status.RETURNED_TIMELY)
-                                .returnDate(null)
+                                .returnDate(LocalDate.now())
                                 .build());
 
-                HttpEntity<String> entity = createEntity(null, librarianUser.getEmail());
+                HttpEntity<String> entity = authEntity(LIBRARIAN_EMAIL);
 
-                ResponseEntity<String> response = restTemplate.exchange(
-                                baseUrl + "/report",
-                                HttpMethod.GET,
-                                entity,
-                                String.class);
+                ResponseEntity<String> response = sendRequest("/report", HttpMethod.GET, entity);
 
                 assertEquals(HttpStatus.OK, response.getStatusCode());
 
-                ApiResponse<PagedResponse<BorrowingDetailed>> apiResponse = objectMapper.readValue(
-                                response.getBody(),
-                                new TypeReference<ApiResponse<PagedResponse<BorrowingDetailed>>>() {
+                ApiResponse<PagedResponse<BorrowingDetailed>> apiResponse = objectMapper.readValue(response.getBody(),
+                                new TypeReference<>() {
                                 });
 
                 assertNotNull(apiResponse.getData());
@@ -342,9 +308,8 @@ class BorrowingControllerIntegrationTest {
         }
 
         @Test
-        void testCreateBorrowing_whenUserNotExists() throws JsonProcessingException {
+        void shouldReturnUnauthorized_whenUserDoesNotExist_onBorrowingCreation() throws JsonProcessingException {
                 BorrowRequest req = new BorrowRequest(null, borrowedBook.getId());
-
                 HttpEntity<String> entity = createEntity(req, "notexists@hotmail.com");
 
                 ResponseEntity<String> response = restTemplate.postForEntity(baseUrl, entity, String.class);
@@ -353,9 +318,8 @@ class BorrowingControllerIntegrationTest {
         }
 
         @Test
-        void testCreateBorrowing_whenBorrowerIdIsGivenButRoleIsNotEnough() {
+        void shouldReturnForbidden_whenBorrowerIdProvidedButUserLacksPermission() {
                 BorrowRequest req = new BorrowRequest(patronUser.getId(), borrowedBook.getId());
-
                 HttpEntity<String> entity = createEntity(req, patronUser.getEmail());
 
                 ResponseEntity<String> response = restTemplate.postForEntity(baseUrl, entity, String.class);
@@ -364,7 +328,7 @@ class BorrowingControllerIntegrationTest {
         }
 
         @Test
-        void testCreateBorrowing_whenBorrowerIsNotActive() {
+        void shouldReturnForbidden_whenBorrowerIsInactive() {
                 patronUser.setIsActive(false);
                 userRepository.save(patronUser);
 
@@ -372,11 +336,12 @@ class BorrowingControllerIntegrationTest {
                 HttpEntity<String> entity = createEntity(req, patronUser.getEmail());
 
                 ResponseEntity<String> response = restTemplate.postForEntity(baseUrl, entity, String.class);
+
                 assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
         }
 
         @Test
-        void testCreateBorrowing_whenUserHasOverdueBorrowings() {
+        void shouldReturnForbidden_whenUserHasOverdueBorrowings() {
                 borrowing.setDueDate(LocalDate.now().minusDays(10));
                 borrowing.setStatus(Borrowing.Status.OVERDUE);
                 borrowingRepository.save(borrowing);
@@ -390,7 +355,7 @@ class BorrowingControllerIntegrationTest {
         }
 
         @Test
-        void testCreateBorrowing_whenUserAlreadyBorrowedSameBook() {
+        void shouldReturnConflict_whenUserAlreadyBorrowedSameBook() {
                 BorrowRequest req = new BorrowRequest(null, borrowedBook.getId());
                 HttpEntity<String> entity = createEntity(req, patronUser.getEmail());
 
@@ -400,33 +365,32 @@ class BorrowingControllerIntegrationTest {
         }
 
         @Test
-        void testCreateBorrowing_whenBookNotAvailable() {
-                Book newBook = bookRepository.save(Book.builder()
+        void shouldReturnConflict_whenBookIsNotAvailable() {
+                Book unavailableBook = bookRepository.save(Book.builder()
                                 .isbn("1234567890124")
                                 .title("Book Title")
                                 .author("Author Name")
                                 .isAvailable(false)
                                 .build());
 
-                BorrowRequest req = new BorrowRequest(null, newBook.getId());
+                BorrowRequest req = new BorrowRequest(null, unavailableBook.getId());
                 HttpEntity<String> entity = createEntity(req, patronUser.getEmail());
 
                 ResponseEntity<String> response = restTemplate.postForEntity(baseUrl, entity, String.class);
 
-                assertEquals(HttpStatus.CONFLICT, response.getStatusCode());
+                assertEquals(HttpStatus.UNPROCESSABLE_ENTITY, response.getStatusCode());
         }
 
         @Test
-        void testCreateBorrowing_whenRequestIsValidSameUser() throws JsonProcessingException {
-                Book newBook = bookRepository.save(Book.builder()
+        void shouldCreateBorrowing_whenValidRequestSameUser() throws JsonProcessingException {
+                Book book = bookRepository.save(Book.builder()
                                 .isbn("1234567890124")
                                 .title("Book Title")
                                 .author("Author Name")
                                 .isAvailable(true)
                                 .build());
-                bookRepository.save(newBook);
 
-                BorrowRequest req = new BorrowRequest(null, newBook.getId());
+                BorrowRequest req = new BorrowRequest(null, book.getId());
                 HttpEntity<String> entity = createEntity(req, patronUser.getEmail());
 
                 ResponseEntity<String> response = restTemplate.postForEntity(baseUrl, entity, String.class);
@@ -435,24 +399,23 @@ class BorrowingControllerIntegrationTest {
 
                 ApiResponse<BorrowingSimple> apiResponse = objectMapper.readValue(
                                 response.getBody(),
-                                new TypeReference<ApiResponse<BorrowingSimple>>() {
+                                new TypeReference<>() {
                                 });
 
                 assertNotNull(apiResponse.getData());
-                assertEquals(newBook.getTitle(), apiResponse.getData().getBook().getTitle());
+                assertEquals(book.getTitle(), apiResponse.getData().getBook().getTitle());
         }
 
         @Test
-        void testCreateBorrowing_whenRequestIsValidOtherUser() throws JsonProcessingException {
-                Book newBook = bookRepository.save(Book.builder()
+        void shouldCreateBorrowing_whenValidRequestByLibrarianForOtherUser() throws JsonProcessingException {
+                Book book = bookRepository.save(Book.builder()
                                 .isbn("1234567890124")
                                 .title("Book Title")
                                 .author("Author Name")
                                 .isAvailable(true)
                                 .build());
-                bookRepository.save(newBook);
 
-                BorrowRequest req = new BorrowRequest(patronUser.getId(), newBook.getId());
+                BorrowRequest req = new BorrowRequest(patronUser.getId(), book.getId());
                 HttpEntity<String> entity = createEntity(req, librarianUser.getEmail());
 
                 ResponseEntity<String> response = restTemplate.postForEntity(baseUrl, entity, String.class);
@@ -461,81 +424,70 @@ class BorrowingControllerIntegrationTest {
 
                 ApiResponse<BorrowingSimple> apiResponse = objectMapper.readValue(
                                 response.getBody(),
-                                new TypeReference<ApiResponse<BorrowingSimple>>() {
+                                new TypeReference<>() {
                                 });
 
                 assertNotNull(apiResponse.getData());
-                assertEquals(newBook.getTitle(), apiResponse.getData().getBook().getTitle());
+                assertEquals(book.getTitle(), apiResponse.getData().getBook().getTitle());
         }
 
         @Test
-        void testReturnBorrowing_whenUserNotExists() {
+        void shouldReturnUnauthorized_whenReturningBorrowingAndUserNotFound() {
                 HttpEntity<String> entity = createEntity(null, "notexists@hotmail.com");
 
                 ResponseEntity<String> response = restTemplate.postForEntity(
-                                baseUrl + "/" + borrowing.getId() + "/return",
-                                entity,
-                                String.class);
+                                baseUrl + "/" + borrowing.getId() + "/return", entity, String.class);
 
                 assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
         }
 
         @Test
-        void testReturnBorrowing_whenBorrowingNotExists() {
+        void shouldReturnNotFound_whenReturningNonExistingBorrowing() {
                 HttpEntity<String> entity = createEntity(null, patronUser.getEmail());
 
                 ResponseEntity<String> response = restTemplate.postForEntity(
-                                baseUrl + "/999999/return",
-                                entity,
-                                String.class);
+                                baseUrl + "/999999/return", entity, String.class);
 
                 assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
         }
 
         @Test
-        void testReturnBorrowing_whenBorrowingIsNotOwnedByUser() {
+        void shouldReturnForbidden_whenReturningBorrowingNotOwnedByUser() {
                 HttpEntity<String> entity = createEntity(null, librarianUser.getEmail());
 
                 ResponseEntity<String> response = restTemplate.postForEntity(
-                                baseUrl + "/" + borrowing.getId() + "/return",
-                                entity,
-                                String.class);
+                                baseUrl + "/" + borrowing.getId() + "/return", entity, String.class);
 
                 assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
         }
 
         @Test
-        void testReturnBorrowing_whenBorrowingIsNotReturnable() {
+        void shouldReturnConflict_whenReturningAlreadyReturnedBorrowing() {
                 borrowing.setStatus(Borrowing.Status.RETURNED_TIMELY);
                 borrowingRepository.save(borrowing);
 
                 HttpEntity<String> entity = createEntity(null, patronUser.getEmail());
 
                 ResponseEntity<String> response = restTemplate.postForEntity(
-                                baseUrl + "/" + borrowing.getId() + "/return",
-                                entity,
-                                String.class);
+                                baseUrl + "/" + borrowing.getId() + "/return", entity, String.class);
 
                 assertEquals(HttpStatus.CONFLICT, response.getStatusCode());
         }
 
         @Test
-        void testReturnBorrowing_whenRequestIsValid() throws JsonProcessingException {
+        void shouldReturnOk_whenValidReturnRequest() throws JsonProcessingException {
                 borrowing.setStatus(Borrowing.Status.BORROWED);
                 borrowingRepository.save(borrowing);
 
                 HttpEntity<String> entity = createEntity(null, patronUser.getEmail());
 
                 ResponseEntity<String> response = restTemplate.postForEntity(
-                                baseUrl + "/" + borrowing.getId() + "/return",
-                                entity,
-                                String.class);
+                                baseUrl + "/" + borrowing.getId() + "/return", entity, String.class);
 
                 assertEquals(HttpStatus.OK, response.getStatusCode());
 
-                ApiResponse<BorrowingDetailed> apiResponse = objectMapper.readValue(
-                                response.getBody(),
-                                new TypeReference<ApiResponse<BorrowingDetailed>>() {
+                ApiResponse<BorrowingDetailed> apiResponse = objectMapper.readValue(response.getBody(),
+                                new TypeReference<>() {
                                 });
 
                 assertNotNull(apiResponse.getData());
@@ -544,70 +496,59 @@ class BorrowingControllerIntegrationTest {
         }
 
         @Test
-        void testExcuseBorrowing_whenUserNotExists() {
+        void shouldReturnUnauthorized_whenExcusingAndUserNotExists() {
                 HttpEntity<String> entity = createEntity(null, "notexists@hotmail.com");
 
                 ResponseEntity<String> response = restTemplate.postForEntity(
-                                baseUrl + "/" + +borrowing.getId() + "/excuse",
-                                entity,
-                                String.class);
+                                baseUrl + "/" + borrowing.getId() + "/excuse", entity, String.class);
 
                 assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
         }
 
         @Test
-        void testExcuseBorrowing_whenRoleIsNotEnough() {
+        void shouldReturnForbidden_whenExcusingAndUserLacksPermission() {
                 HttpEntity<String> entity = createEntity(null, patronUser.getEmail());
 
                 ResponseEntity<String> response = restTemplate.postForEntity(
-                                baseUrl + "/" + +borrowing.getId() + "/excuse",
-                                entity,
-                                String.class);
+                                baseUrl + "/" + borrowing.getId() + "/excuse", entity, String.class);
+
                 assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
         }
 
         @Test
-        void testExcuseBorrowing_whenBorrowingNotExists() {
+        void shouldReturnNotFound_whenExcusingNonExistingBorrowing() {
                 HttpEntity<String> entity = createEntity(null, librarianUser.getEmail());
 
                 ResponseEntity<String> response = restTemplate.postForEntity(
-                                baseUrl + "/" + +Long.MAX_VALUE + "/excuse",
-                                entity,
-                                String.class);
+                                baseUrl + "/" + Long.MAX_VALUE + "/excuse", entity, String.class);
 
                 assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
         }
 
         @Test
-        void testExcuseBorrowing_whenBorrowingIsNotExcusable() {
-
+        void shouldReturnConflict_whenExcusingNotExcusableBorrowing() {
                 HttpEntity<String> entity = createEntity(null, librarianUser.getEmail());
 
                 ResponseEntity<String> response = restTemplate.postForEntity(
-                                baseUrl + "/" + +borrowing.getId() + "/excuse",
-                                entity,
-                                String.class);
+                                baseUrl + "/" + borrowing.getId() + "/excuse", entity, String.class);
 
-                assertEquals(HttpStatus.CONFLICT, response.getStatusCode());
+                assertEquals(HttpStatus.UNPROCESSABLE_ENTITY, response.getStatusCode());
         }
 
         @Test
-        void testExcuseBorrowing_whenRequestIsValid() throws JsonProcessingException {
+        void shouldExcuseBorrowing_whenValidRequest() throws JsonProcessingException {
                 borrowing.setStatus(Borrowing.Status.RETURNED_OVERDUE);
                 borrowingRepository.save(borrowing);
 
                 HttpEntity<String> entity = createEntity(null, librarianUser.getEmail());
 
                 ResponseEntity<String> response = restTemplate.postForEntity(
-                                baseUrl + "/" + +borrowing.getId() + "/excuse",
-                                entity,
-                                String.class);
+                                baseUrl + "/" + borrowing.getId() + "/excuse", entity, String.class);
 
                 assertEquals(HttpStatus.OK, response.getStatusCode());
 
-                ApiResponse<BorrowingDetailed> apiResponse = objectMapper.readValue(
-                                response.getBody(),
-                                new TypeReference<ApiResponse<BorrowingDetailed>>() {
+                ApiResponse<BorrowingDetailed> apiResponse = objectMapper.readValue(response.getBody(),
+                                new TypeReference<>() {
                                 });
 
                 assertNotNull(apiResponse.getData());
