@@ -11,6 +11,7 @@ import com.huseyinsarsilmaz.lms.service.ReactiveBorrowingService;
 import com.huseyinsarsilmaz.lms.service.ReactiveUserService;
 
 import lombok.RequiredArgsConstructor;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 @Service
@@ -47,11 +48,14 @@ public class ReactiveBorrowingServiceImpl implements ReactiveBorrowingService {
     public Mono<Borrowing> returnBorrowing(Borrowing borrowing) {
         LocalDate now = LocalDate.now();
         borrowing.setReturnDate(now);
-
         updateBorrowingStatus(borrowing, now);
 
         return handleOverdueStatus(borrowing)
                 .then(bookService.updateAvailability(borrowing.getBook(), true))
                 .then(borrowingRepository.save(borrowing));
+    }
+
+    public Flux<Borrowing> returnBorrowings(Flux<Borrowing> borrowings) {
+        return borrowings.flatMap(this::returnBorrowing);
     }
 }
