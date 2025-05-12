@@ -75,7 +75,7 @@ public class BookServiceTest {
         book2.setDescription("Jumping jack exercises");
         book2.setIsbn("123-0134685992");
         book2.setPublicationDate(LocalDate.of(2021, 8, 17));
-        book2.setGenre(Book.Genre.SELF_HELP);
+        book2.setGenre(Book.Genre.POETRY);
         book2.setIsAvailable(true);
     }
 
@@ -173,7 +173,7 @@ public class BookServiceTest {
                 when(bookRepository.findByIsbnContainingIgnoreCase(eq(query), any(Pageable.class)))
                         .thenReturn(expectedPage);
             case GENRE ->
-                when(bookRepository.findByGenre(eq(Book.Genre.SELF_HELP), any(Pageable.class)))
+                when(bookRepository.findByGenre(eq(Book.Genre.POETRY), any(Pageable.class)))
                         .thenReturn(expectedPage);
         }
 
@@ -195,7 +195,7 @@ public class BookServiceTest {
         book1.setIsAvailable(false);
         when(bookRepository.save(any(Book.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-        Book updatedBook = bookService.changeAvailability(book1, true);
+        Book updatedBook = bookService.updateAvailability(book1, true);
 
         assertTrue(updatedBook.getIsAvailable());
         verify(bookRepository).save(book1);
@@ -204,7 +204,7 @@ public class BookServiceTest {
     @Test
     public void testChangeAvailability_whenAvailabilityDoesNotChange() {
 
-        Book updatedBook = bookService.changeAvailability(book1, true);
+        Book updatedBook = bookService.updateAvailability(book1, true);
 
         assertTrue(updatedBook.getIsAvailable());
         verify(bookRepository, never()).save(any(Book.class));

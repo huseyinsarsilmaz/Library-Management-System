@@ -90,7 +90,7 @@ public class BorrowingServiceTest {
         when(userService.getById(1L)).thenReturn(user);
         when(bookService.getById(1L)).thenReturn(book);
         doNothing().when(bookService).checkAvailability(book);
-        when(bookService.changeAvailability(book, false)).thenReturn(book);
+        when(bookService.updateAvailability(book, false)).thenReturn(book);
         when(borrowingRepository.save(any(Borrowing.class))).thenAnswer(inv -> inv.getArgument(0));
 
         Borrowing result = borrowingService.create(req);
@@ -161,7 +161,7 @@ public class BorrowingServiceTest {
     public void testReturnBorrowing_whenTimely() {
         borrowing.setDueDate(LocalDate.now().plusDays(1));
 
-        when(bookService.changeAvailability(book, true)).thenReturn(book);
+        when(bookService.updateAvailability(book, true)).thenReturn(book);
         when(borrowingRepository.save(borrowing)).thenReturn(borrowing);
 
         Borrowing returned = borrowingService.returnBorrowing(borrowing);
@@ -174,7 +174,7 @@ public class BorrowingServiceTest {
     @Test
     public void testReturnBorrowing_whenOverdueAndNotSuspended() {
         when(borrowingRepository.countByBorrowerIdAndStatus(user.getId(), Borrowing.Status.OVERDUE)).thenReturn(1L);
-        when(bookService.changeAvailability(book, true)).thenReturn(book);
+        when(bookService.updateAvailability(book, true)).thenReturn(book);
         when(borrowingRepository.save(borrowing)).thenReturn(borrowing);
 
         Borrowing returned = borrowingService.returnBorrowing(borrowing);
@@ -187,7 +187,7 @@ public class BorrowingServiceTest {
     public void testReturnBorrowing_whenOverdueAndSuspended() {
         book.setIsAvailable(false);
         when(borrowingRepository.countByBorrowerIdAndStatus(user.getId(), Borrowing.Status.OVERDUE)).thenReturn(2L);
-        when(bookService.changeAvailability(book, true)).thenAnswer(inv -> {
+        when(bookService.updateAvailability(book, true)).thenAnswer(inv -> {
             book.setIsAvailable(true);
             return book;
         });

@@ -1,7 +1,5 @@
 package com.huseyinsarsilmaz.lms.service.impl;
 
-import java.util.Optional;
-
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -16,6 +14,7 @@ import com.huseyinsarsilmaz.lms.model.mapper.BookMapper;
 import com.huseyinsarsilmaz.lms.repository.BookRepository;
 import com.huseyinsarsilmaz.lms.service.BookService;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -26,31 +25,28 @@ public class BookServiceImpl implements BookService {
     private final BookMapper bookMapper;
 
     public Book create(BookCreateRequest req) {
-
+        isIsbnTaken(req.getIsbn());
         return bookRepository.save(bookMapper.toEntity(req));
     }
 
     public void isIsbnTaken(String isbn) {
         if (bookRepository.findByIsbn(isbn).isPresent()) {
-            throw new AlreadyExistsException(Book.class.getSimpleName(), "isbn");
+            throw new AlreadyExistsException("Book", "isbn");
         }
     }
 
     public Book getById(long id) {
-        Optional<Book> optBook = bookRepository.findById(id);
-        if (optBook.isEmpty()) {
-            throw new NotFoundException(Book.class.getSimpleName(), "id");
-        }
-
-        return optBook.get();
+        return bookRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Book", "id"));
     }
 
+    @Transactional
     public Book update(Book book, BookUpdateRequest req) {
         bookMapper.updateEntity(book, req);
-
         return bookRepository.save(book);
     }
 
+    @Transactional
     public void delete(Book book) {
         bookRepository.delete(book);
     }
@@ -72,19 +68,18 @@ public class BookServiceImpl implements BookService {
         };
     }
 
-    public Book changeAvailability(Book book, boolean newAvailability) {
+    @Transactional
+    public Book updateAvailability(Book book, boolean newAvailability) {
         if (!book.getIsAvailable().equals(newAvailability)) {
             book.setIsAvailable(newAvailability);
-            book = bookRepository.save(book);
+            return bookRepository.save(book);
         }
-
         return book;
     }
 
     public void checkAvailability(Book book) {
         if (!book.getIsAvailable()) {
-            throw new NotAvailableException(Book.class.getSimpleName());
+            throw new NotAvailableException("Book");
         }
     }
-
 }

@@ -52,7 +52,7 @@ public class BorrowingServiceImpl implements BorrowingService {
         Book book = bookService.getById(req.getBookId());
 
         bookService.checkAvailability(book);
-        book = bookService.changeAvailability(book, false);
+        book = bookService.updateAvailability(book, false);
 
         Borrowing newBorrowing = Borrowing.builder()
                 .borrower(borrower)
@@ -107,7 +107,7 @@ public class BorrowingServiceImpl implements BorrowingService {
             }
         }
 
-        bookService.changeAvailability(borrowing.getBook(), true);
+        bookService.updateAvailability(borrowing.getBook(), true);
         return borrowingRepository.save(borrowing);
     }
 
