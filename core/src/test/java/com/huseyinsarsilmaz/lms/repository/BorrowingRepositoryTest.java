@@ -49,6 +49,11 @@ public class BorrowingRepositoryTest {
     private User createUser(String email) {
         User user = new User();
         user.setEmail(email);
+        user.setName("name");
+        user.setSurname("surname");
+        user.setPassword("12345678");
+        user.setRoles("ROLE_PATRON");
+        user.setPhoneNumber("5051112233");
         user.setIsActive(true);
         return userRepository.save(user);
     }
@@ -59,6 +64,7 @@ public class BorrowingRepositoryTest {
         book.setAuthor("Hüseyin Sarsilmaz");
         book.setIsbn(UUID.randomUUID().toString());
         book.setGenre(Book.Genre.FICTION);
+        book.setPublicationDate(LocalDate.now());
         return bookRepository.save(book);
     }
 
@@ -67,6 +73,7 @@ public class BorrowingRepositoryTest {
         borrowing.setBorrower(user);
         borrowing.setBook(book);
         borrowing.setStatus(status);
+        borrowing.setBorrowDate(LocalDate.now());
         borrowing.setDueDate(dueDate);
         return borrowingRepository.save(borrowing);
     }

@@ -35,6 +35,11 @@ public class UserRepositoryTest {
     private User createUser(String email, boolean isActive) {
         User user = new User();
         user.setEmail(email);
+        user.setName("name");
+        user.setSurname("surname");
+        user.setPassword("12345678");
+        user.setRoles("ROLE_PATRON");
+        user.setPhoneNumber("5051112233");
         user.setIsActive(isActive);
         return userRepository.save(user);
     }

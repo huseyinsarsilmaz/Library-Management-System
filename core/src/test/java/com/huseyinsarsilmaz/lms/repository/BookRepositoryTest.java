@@ -2,6 +2,7 @@ package com.huseyinsarsilmaz.lms.repository;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import java.time.LocalDate;
 import java.util.Optional;
 
 import com.huseyinsarsilmaz.lms.model.entity.Book;
@@ -46,6 +47,7 @@ public class BookRepositoryTest {
         book.setAuthor(author);
         book.setIsbn(isbn);
         book.setGenre(genre);
+        book.setPublicationDate(LocalDate.now());
         return bookRepository.save(book);
     }
 

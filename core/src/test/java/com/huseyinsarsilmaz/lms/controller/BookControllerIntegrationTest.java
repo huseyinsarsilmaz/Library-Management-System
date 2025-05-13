@@ -60,7 +60,7 @@ class BookControllerIntegrationTest {
         private User patronUser;
 
         private static final String EXISTING_ISBN = "1234567890";
-        private static final String DUPLICATE_ISBN = "978-3-16-148410-9";
+        private static final String DUPLICATE_ISBN = "9783161484109";
         private static final String NON_EXISTENT_USER = "notexists@hotmail.com";
         private static final String LIBRARIAN_EMAIL = "huseyinsarsilmaz@hotmail.com";
         private static final String PATRON_EMAIL = "huseyinsarsilmaz2@hotmail.com";
@@ -124,6 +124,8 @@ class BookControllerIntegrationTest {
                                 .title("How to write code")
                                 .author("Hüseyin Sarsılmaz")
                                 .isAvailable(true)
+                                .publicationDate(LocalDate.now())
+                                .genre(Book.Genre.ADVENTURE)
                                 .build());
 
                 librarianUser = userRepository.save(User.builder()
@@ -196,7 +198,7 @@ class BookControllerIntegrationTest {
 
         @Test
         void testCreateBook_whenRequestIsValid() throws JsonProcessingException {
-                BookCreateRequest req = createValidBookRequest("978-3-16-148410-0");
+                BookCreateRequest req = createValidBookRequest("9783161484100");
                 HttpEntity<String> entity = createEntity(req, librarianUser.getEmail());
                 ResponseEntity<String> response = restTemplate.postForEntity(baseUrl, entity, String.class);
 
@@ -243,6 +245,8 @@ class BookControllerIntegrationTest {
                                 .title("Another Book")
                                 .author("Author")
                                 .isAvailable(true)
+                                .publicationDate(LocalDate.now())
+                                .genre(Book.Genre.ADVENTURE)
                                 .build());
 
                 BookUpdateRequest req = createValidUpdateRequest(DUPLICATE_ISBN);

@@ -141,6 +141,8 @@ class BorrowingControllerIntegrationTest {
                                 .title("Book Title")
                                 .author("Author Name")
                                 .isAvailable(false)
+                                .publicationDate(LocalDate.now())
+                                .genre(Book.Genre.ADVENTURE)
                                 .build());
 
                 borrowing = borrowingRepository.save(Borrowing.builder()
@@ -280,6 +282,8 @@ class BorrowingControllerIntegrationTest {
                                 .title("New Book")
                                 .author("New Author")
                                 .isAvailable(false)
+                                .publicationDate(LocalDate.now())
+                                .genre(Book.Genre.ADVENTURE)
                                 .build());
 
                 borrowingRepository.save(Borrowing.builder()
@@ -369,6 +373,8 @@ class BorrowingControllerIntegrationTest {
                 Book unavailableBook = bookRepository.save(Book.builder()
                                 .isbn("1234567890124")
                                 .title("Book Title")
+                                .publicationDate(LocalDate.now())
+                                .genre(Book.Genre.ADVENTURE)
                                 .author("Author Name")
                                 .isAvailable(false)
                                 .build());
@@ -387,6 +393,8 @@ class BorrowingControllerIntegrationTest {
                                 .isbn("1234567890124")
                                 .title("Book Title")
                                 .author("Author Name")
+                                .publicationDate(LocalDate.now())
+                                .genre(Book.Genre.ADVENTURE)
                                 .isAvailable(true)
                                 .build());
 
@@ -411,6 +419,8 @@ class BorrowingControllerIntegrationTest {
                 Book book = bookRepository.save(Book.builder()
                                 .isbn("1234567890124")
                                 .title("Book Title")
+                                .publicationDate(LocalDate.now())
+                                .genre(Book.Genre.ADVENTURE)
                                 .author("Author Name")
                                 .isAvailable(true)
                                 .build());

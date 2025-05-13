@@ -61,8 +61,8 @@ public class BookServiceTest {
     @BeforeEach
     public void setUp() {
         book1 = createBook(1L, "How to write code", "Hüseyin Sarsılmaz", "Best practices for writing Java code.",
-                "978-0134685991", LocalDate.of(2017, 6, 17), Book.Genre.BIOGRAPHY);
-        book2 = createBook(2L, "Jumping Jacks", "Jack the Jumper", "Jumping jack exercises", "123-0134685992",
+                "9780134685991", LocalDate.of(2017, 6, 17), Book.Genre.BIOGRAPHY);
+        book2 = createBook(2L, "Jumping Jacks", "Jack the Jumper", "Jumping jack exercises", "1230134685992",
                 LocalDate.of(2021, 8, 17), Book.Genre.POETRY);
 
     }
@@ -86,7 +86,7 @@ public class BookServiceTest {
         req.setTitle("How to write code");
         req.setAuthor("Hüseyin Sarsılmaz");
         req.setDescription("Best practices for writing Java code.");
-        req.setIsbn("978-0134685991");
+        req.setIsbn("9780134685991");
         req.setPublicationDate(LocalDate.of(2017, 6, 17));
         req.setGenre(Book.Genre.BIOGRAPHY);
         return req;
@@ -109,16 +109,16 @@ public class BookServiceTest {
 
     @Test
     public void testIsIsbnTaken_shouldThrowExceptionWhenIsbnExists() {
-        when(bookRepository.findByIsbn(eq("978-0134685991"))).thenReturn(Optional.of(book1));
+        when(bookRepository.findByIsbn(eq("9780134685991"))).thenReturn(Optional.of(book1));
 
-        assertThrows(AlreadyExistsException.class, () -> bookService.isIsbnTaken("978-0134685991"));
+        assertThrows(AlreadyExistsException.class, () -> bookService.isIsbnTaken("9780134685991"));
     }
 
     @Test
     public void testIsIsbnTaken_shouldNotThrowWhenIsbnDoesNotExist() {
-        when(bookRepository.findByIsbn(eq("978-0134686000"))).thenReturn(Optional.empty());
+        when(bookRepository.findByIsbn(eq("9780134686000"))).thenReturn(Optional.empty());
 
-        assertDoesNotThrow(() -> bookService.isIsbnTaken("978-0134686000"));
+        assertDoesNotThrow(() -> bookService.isIsbnTaken("9780134686000"));
     }
 
     @Test
