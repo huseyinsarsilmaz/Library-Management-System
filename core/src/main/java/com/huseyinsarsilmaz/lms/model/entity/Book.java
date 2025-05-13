@@ -22,19 +22,24 @@ import lombok.NoArgsConstructor;
 @Table(name = "books")
 public class Book extends LmsEntity {
 
+    @Column(nullable = false)
     private String title;
+    @Column(nullable = false)
     private String author;
 
     @Column(length = 2048)
     private String description;
-
+    @Column(nullable = false)
     private String isbn;
+    @Column(nullable = false)
     private LocalDate publicationDate;
 
     @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     private Genre genre;
 
     @Builder.Default
+    @Column(nullable = false)
     private Boolean isAvailable = true;
 
     public enum Genre {

@@ -2,6 +2,7 @@ package com.huseyinsarsilmaz.lms.model.entity;
 
 import java.time.LocalDate;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -31,11 +32,15 @@ public class Borrowing extends LmsEntity {
     @JoinColumn(name = "book_id")
     private Book book;
 
+    @Column(nullable = false)
     private LocalDate borrowDate;
+    @Column(nullable = false)
     private LocalDate dueDate;
+    @Column(nullable = true)
     private LocalDate returnDate;
 
     @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     private Status status;
 
     public enum Status {
