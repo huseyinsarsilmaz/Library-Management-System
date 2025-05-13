@@ -17,6 +17,11 @@ import com.huseyinsarsilmaz.lms.service.AuthService;
 import com.huseyinsarsilmaz.lms.service.UserService;
 import com.huseyinsarsilmaz.lms.util.LmsResponseBuilder;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
@@ -30,6 +35,13 @@ public class AuthController {
     private final LmsResponseBuilder responseBuilder;
 
     @PostMapping("/register")
+    @Operation(summary = "Register a new user", description = "Registers a new user in the system. Admin registration requires a valid secret code.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "User successfully registered", content = @Content(mediaType = "application/json", schema = @Schema(implementation = RegisterResponse.class))),
+            @ApiResponse(responseCode = "403", description = "Forbidden - Invalid admin secret code or admin already exists", content = @Content),
+            @ApiResponse(responseCode = "409", description = "Conflict - When a user with given email already exists", content = @Content),
+            @ApiResponse(responseCode = "400", description = "Bad Request - Validation failed", content = @Content)
+    })
 
     public ResponseEntity<LmsApiResponse<RegisterResponse>> register(@Valid @RequestBody RegisterRequest request) {
 
@@ -40,6 +52,12 @@ public class AuthController {
     }
 
     @PostMapping("/login")
+    @Operation(summary = "User login", description = "Authenticates a user and generates a JWT token for further requests.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Login successful - JWT token returned", content = @Content(mediaType = "application/json", schema = @Schema(implementation = LoginResponse.class))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized - Invalid credentials", content = @Content),
+            @ApiResponse(responseCode = "400", description = "Bad Request - Validation failed", content = @Content)
+    })
     public ResponseEntity<LmsApiResponse<LoginResponse>> login(@Valid @RequestBody LoginRequest request) {
         String jwtToken = authService.authenticateAndGenerateToken(request);
         LoginResponse response = new LoginResponse(jwtToken);

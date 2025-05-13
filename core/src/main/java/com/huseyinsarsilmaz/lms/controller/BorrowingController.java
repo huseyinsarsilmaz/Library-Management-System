@@ -27,6 +27,11 @@ import com.huseyinsarsilmaz.lms.service.BorrowingService;
 import com.huseyinsarsilmaz.lms.service.UserService;
 import com.huseyinsarsilmaz.lms.util.LmsResponseBuilder;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
@@ -40,6 +45,11 @@ public class BorrowingController {
     private final BorrowingMapper borrowingMapper;
 
     @PostMapping
+    @Operation(summary = "Create a new borrowing", description = "Creates a new borrowing record for a book.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "Borrowing successfully created", content = @Content(mediaType = "application/json", schema = @Schema(implementation = BorrowingSimple.class))),
+            @ApiResponse(responseCode = "400", description = "Bad Request - Invalid borrowing request data", content = @Content)
+    })
     public ResponseEntity<LmsApiResponse<BorrowingSimple>> createBorrowing(
             @CurrentUser User myUser,
             @Valid @RequestBody BorrowRequest req) {
@@ -59,6 +69,12 @@ public class BorrowingController {
     }
 
     @PostMapping("/{id}/return")
+    @Operation(summary = "Return a borrowed book", description = "Marks a book as returned and updates the borrowing record.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Borrowing successfully returned", content = @Content(mediaType = "application/json", schema = @Schema(implementation = BorrowingDetailed.class))),
+            @ApiResponse(responseCode = "400", description = "Bad Request - Borrowing cannot be returned", content = @Content),
+            @ApiResponse(responseCode = "404", description = "Not Found - Borrowing record not found", content = @Content)
+    })
     public ResponseEntity<LmsApiResponse<BorrowingDetailed>> returnBorrowing(
             @CurrentUser User myUser,
             @PathVariable("id") long id) {
@@ -75,6 +91,10 @@ public class BorrowingController {
     }
 
     @GetMapping("/my")
+    @Operation(summary = "Get current user's borrowing history", description = "Fetches the borrowing history of the currently authenticated user.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Borrowing history fetched successfully", content = @Content(mediaType = "application/json", schema = @Schema(implementation = PagedResponse.class)))
+    })
     public ResponseEntity<LmsApiResponse<PagedResponse<BorrowingSimple>>> getMyBorrowingHistory(
             @CurrentUser User myUser,
             @PageableDefault(size = 10, sort = "borrower") Pageable pageable) {
@@ -87,6 +107,11 @@ public class BorrowingController {
 
     @PreAuthorize("hasRole('ROLE_LIBRARIAN')")
     @GetMapping("/user/{id}")
+    @Operation(summary = "Get a user's borrowing history", description = "Fetches the borrowing history of a specific user by their ID.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Borrowing history fetched successfully", content = @Content(mediaType = "application/json", schema = @Schema(implementation = PagedResponse.class))),
+            @ApiResponse(responseCode = "404", description = "Not Found - User not found", content = @Content)
+    })
     public ResponseEntity<LmsApiResponse<PagedResponse<BorrowingDetailed>>> getBorrowingHistory(
             @PathVariable("id") long id,
             @PageableDefault(size = 10, sort = "borrower") Pageable pageable) {
@@ -100,6 +125,10 @@ public class BorrowingController {
 
     @PreAuthorize("hasRole('ROLE_LIBRARIAN')")
     @GetMapping("/report")
+    @Operation(summary = "Get borrowing overdue report", description = "Generates a report of overdue borrowings, either for all users or a specific user.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Overdue borrowing report fetched successfully", content = @Content(mediaType = "application/json", schema = @Schema(implementation = PagedResponse.class)))
+    })
     public ResponseEntity<LmsApiResponse<PagedResponse<BorrowingDetailed>>> getBorrowingReport(
             @RequestParam(required = false) Long borrowerId,
             @PageableDefault(size = 10, sort = "borrower") Pageable pageable) {
@@ -121,6 +150,13 @@ public class BorrowingController {
 
     @PreAuthorize("hasRole('ROLE_LIBRARIAN')")
     @PostMapping("/{id}/excuse")
+    @Operation(summary = "Excuse a returned overdue borrowing", description = "Excuses a returned borrowing that was overdue, effectively removing penalties.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Borrowing excused successfully", content = @Content(mediaType = "application/json", schema = @Schema(implementation = BorrowingDetailed.class))),
+            @ApiResponse(responseCode = "404", description = "Not Found - Borrowing record not found", content = @Content),
+            @ApiResponse(responseCode = "422", description = "Unprocessable entity - Borrowing is not excusable", content = @Content)
+
+    })
     public ResponseEntity<LmsApiResponse<BorrowingDetailed>> excuseBorrowing(@PathVariable("id") long id) {
 
         Borrowing borrowing = borrowingService.getById(id);
