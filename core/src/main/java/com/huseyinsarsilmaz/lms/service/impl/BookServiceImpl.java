@@ -24,8 +24,13 @@ public class BookServiceImpl implements BookService {
     private final BookRepository bookRepository;
     private final BookMapper bookMapper;
 
+    private String convertToCompactIsbn(String rawIsbn) {
+        return rawIsbn.trim().toUpperCase().replaceAll("[^0-9X]", "");
+    }
+
     public Book create(BookCreateRequest req) {
         isIsbnTaken(req.getIsbn());
+        req.setIsbn(convertToCompactIsbn(req.getIsbn()));
         return bookRepository.save(bookMapper.toEntity(req));
     }
 
@@ -42,6 +47,7 @@ public class BookServiceImpl implements BookService {
 
     @Transactional
     public Book update(Book book, BookUpdateRequest req) {
+        req.setIsbn(convertToCompactIsbn(req.getIsbn()));
         bookMapper.updateEntity(book, req);
         return bookRepository.save(book);
     }
@@ -52,10 +58,11 @@ public class BookServiceImpl implements BookService {
     }
 
     public Page<Book> searchBooks(Book.SearchType searchType, String query, Pageable pageable) {
+
         return switch (searchType) {
             case TITLE -> bookRepository.findByTitleContainingIgnoreCase(query, pageable);
             case AUTHOR -> bookRepository.findByAuthorContainingIgnoreCase(query, pageable);
-            case ISBN -> bookRepository.findByIsbnContainingIgnoreCase(query, pageable);
+            case ISBN -> bookRepository.findByIsbnContainingIgnoreCase(convertToCompactIsbn(query), pageable);
             case GENRE -> {
                 Book.Genre genre;
                 try {
