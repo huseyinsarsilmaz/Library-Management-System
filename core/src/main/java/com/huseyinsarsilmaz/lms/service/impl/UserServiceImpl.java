@@ -13,6 +13,8 @@ import com.huseyinsarsilmaz.lms.exception.UserInactiveException;
 import com.huseyinsarsilmaz.lms.exception.UserNotDeactivatedException;
 import com.huseyinsarsilmaz.lms.exception.UserPromotionException;
 import com.huseyinsarsilmaz.lms.exception.NotFoundException;
+import com.huseyinsarsilmaz.lms.exception.PassordNotMatchedException;
+import com.huseyinsarsilmaz.lms.model.dto.request.PasswordUpdateRequest;
 import com.huseyinsarsilmaz.lms.model.dto.request.RegisterRequest;
 import com.huseyinsarsilmaz.lms.model.dto.request.UserUpdateRequest;
 import com.huseyinsarsilmaz.lms.model.entity.User;
@@ -109,5 +111,15 @@ public class UserServiceImpl implements UserService {
         if (!userRepository.existsByIdAndIsActiveFalse(user.getId())) {
             throw new UserNotDeactivatedException();
         }
+    }
+
+    @Transactional
+    public User updatePassword(User user, PasswordUpdateRequest req) {
+        if (!passwordEncoder.matches(req.getOldPassword(), user.getPassword())) {
+            throw new PassordNotMatchedException();
+        }
+
+        user.setPassword(passwordEncoder.encode(req.getNewPassword()));
+        return userRepository.save(user);
     }
 }

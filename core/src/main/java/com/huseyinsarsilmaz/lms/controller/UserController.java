@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.huseyinsarsilmaz.lms.model.dto.request.PasswordUpdateRequest;
 import com.huseyinsarsilmaz.lms.model.dto.request.PromoteRequest;
 import com.huseyinsarsilmaz.lms.model.dto.request.UserUpdateRequest;
 import com.huseyinsarsilmaz.lms.model.dto.response.ApiResponse;
@@ -80,6 +81,15 @@ public class UserController {
         myUser = userService.update(myUser, req);
 
         return responseBuilder.success("User Profile", "updated", userMapper.toDtoSimple(myUser), HttpStatus.OK);
+    }
+
+    @PutMapping("/me/password")
+    public ResponseEntity<ApiResponse<UserSimple>> updateMyPassword(@CurrentUser User myUser,
+            @Valid @RequestBody PasswordUpdateRequest req) {
+
+        myUser = userService.updatePassword(myUser, req);
+
+        return responseBuilder.success("User Password", "updated", userMapper.toDtoSimple(myUser), HttpStatus.OK);
     }
 
     @DeleteMapping("/me")

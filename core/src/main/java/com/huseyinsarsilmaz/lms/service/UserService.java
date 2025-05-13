@@ -1,5 +1,6 @@
 package com.huseyinsarsilmaz.lms.service;
 
+import com.huseyinsarsilmaz.lms.model.dto.request.PasswordUpdateRequest;
 import com.huseyinsarsilmaz.lms.model.dto.request.RegisterRequest;
 import com.huseyinsarsilmaz.lms.model.dto.request.UserUpdateRequest;
 import com.huseyinsarsilmaz.lms.model.entity.User;
@@ -19,6 +20,8 @@ public interface UserService {
     public void checkHasRole(User user, User.Role requiredRole);
 
     public User update(User user, UserUpdateRequest req);
+
+    public User updatePassword(User user, PasswordUpdateRequest req);
 
     public void delete(User user);
 
