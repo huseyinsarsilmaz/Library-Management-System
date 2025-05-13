@@ -19,17 +19,19 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 import com.huseyinsarsilmaz.lms.model.dto.response.ApiResponse;
-import com.huseyinsarsilmaz.lms.util.ResponseBuilder;
+import com.huseyinsarsilmaz.lms.util.LmsResponseBuilder;
 
+import io.swagger.v3.oas.annotations.Hidden;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 @RestControllerAdvice
+@Hidden
 @RequiredArgsConstructor
 @Slf4j
 public class GlobalExceptionHandler {
 
-    private final ResponseBuilder responseBuilder;
+    private final LmsResponseBuilder responseBuilder;
 
     @ExceptionHandler(LmsException.class)
     public ResponseEntity<ApiResponse<String>> handleLmsException(LmsException ex) {

@@ -13,7 +13,7 @@ import lombok.RequiredArgsConstructor;
 
 @Component
 @RequiredArgsConstructor
-public class ResponseBuilder {
+public class LmsResponseBuilder {
     private final MessageSource messageSource;
 
     public <T> ResponseEntity<ApiResponse<T>> success(String entity, String action, T data,

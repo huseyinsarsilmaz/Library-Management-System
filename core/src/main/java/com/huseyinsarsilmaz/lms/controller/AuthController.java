@@ -15,7 +15,7 @@ import com.huseyinsarsilmaz.lms.model.dto.response.RegisterResponse;
 import com.huseyinsarsilmaz.lms.model.entity.User;
 import com.huseyinsarsilmaz.lms.service.AuthService;
 import com.huseyinsarsilmaz.lms.service.UserService;
-import com.huseyinsarsilmaz.lms.util.ResponseBuilder;
+import com.huseyinsarsilmaz.lms.util.LmsResponseBuilder;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -27,7 +27,7 @@ public class AuthController {
 
     private final UserService userService;
     private final AuthService authService;
-    private final ResponseBuilder responseBuilder;
+    private final LmsResponseBuilder responseBuilder;
 
     @PostMapping("/register")
     public ResponseEntity<ApiResponse<RegisterResponse>> register(@Valid @RequestBody RegisterRequest request) {

@@ -24,7 +24,7 @@ import com.huseyinsarsilmaz.lms.model.dto.response.PagedResponse;
 import com.huseyinsarsilmaz.lms.model.entity.Book;
 import com.huseyinsarsilmaz.lms.model.mapper.BookMapper;
 import com.huseyinsarsilmaz.lms.service.BookService;
-import com.huseyinsarsilmaz.lms.util.ResponseBuilder;
+import com.huseyinsarsilmaz.lms.util.LmsResponseBuilder;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -35,7 +35,7 @@ import lombok.RequiredArgsConstructor;
 public class BookController {
 
     private final BookService bookService;
-    private final ResponseBuilder responseBuilder;
+    private final LmsResponseBuilder responseBuilder;
     private final BookMapper bookMapper;
 
     @PreAuthorize("hasRole('ROLE_LIBRARIAN')")

@@ -25,7 +25,7 @@ import com.huseyinsarsilmaz.lms.model.mapper.BorrowingMapper;
 import com.huseyinsarsilmaz.lms.security.CurrentUser;
 import com.huseyinsarsilmaz.lms.service.BorrowingService;
 import com.huseyinsarsilmaz.lms.service.UserService;
-import com.huseyinsarsilmaz.lms.util.ResponseBuilder;
+import com.huseyinsarsilmaz.lms.util.LmsResponseBuilder;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -36,7 +36,7 @@ import lombok.RequiredArgsConstructor;
 public class BorrowingController {
     private final BorrowingService borrowingService;
     private final UserService userService;
-    private final ResponseBuilder responseBuilder;
+    private final LmsResponseBuilder responseBuilder;
     private final BorrowingMapper borrowingMapper;
 
     @PostMapping
