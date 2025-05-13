@@ -1,5 +1,6 @@
 package com.huseyinsarsilmaz.lmsr.controller;
 
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -19,6 +20,7 @@ public class BulkReturnController {
 
     private final BorrowingService borrowingService;
 
+    @PreAuthorize("hasRole('ROLE_LIBRARIAN')")
     @PostMapping("/bulk-return")
     public Flux<Borrowing> bulkReturn(@RequestBody BulkReturnRequest bulkReturnRequest) {
         return borrowingService.returnBorrowings(bulkReturnRequest.getBorrowingIds())

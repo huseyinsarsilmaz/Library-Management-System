@@ -10,10 +10,13 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.security.Key;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Component
 public class JwtService {
@@ -21,8 +24,9 @@ public class JwtService {
     @Value("${jwt.secret}")
     public String secret;
 
-    public String generateToken(String email) {
+    public String generateToken(String email, List<String> roles) {
         Map<String, Object> claims = new HashMap<>();
+        claims.put("roles", roles);
         return createToken(claims, email);
     }
 
@@ -68,6 +72,20 @@ public class JwtService {
 
     public Boolean validateToken(String token, String email) {
         return (email.equals(extractEmail(token)) && !isTokenExpired(token));
+    }
+
+    public List<String> extractRoles(String token) {
+        Claims claims = extractAllClaims(token);
+        Object roles = claims.get("roles");
+
+        if (roles instanceof List<?>) {
+            return ((List<?>) roles).stream()
+                    .filter(String.class::isInstance)
+                    .map(String.class::cast)
+                    .collect(Collectors.toList());
+        }
+
+        return Collections.emptyList();
     }
 
 }
