@@ -11,5 +11,7 @@ import com.huseyinsarsilmaz.lms.model.entity.User;
 public interface UserRepository extends JpaRepository<User, Long> {
     Optional<User> findByEmail(String email);
 
+    Optional<User> findByRoles(String roles);
+
     boolean existsByIdAndIsActiveFalse(Long id);
 }

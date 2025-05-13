@@ -99,7 +99,8 @@ class AuthControllerIntegrationTest {
                 PASSWORD,
                 "Test",
                 "User",
-                "1234567890");
+                "1234567890",
+                null);
 
         ResponseEntity<String> response = restTemplate.postForEntity(baseUrl + "/register", createEntity(request),
                 String.class);
@@ -117,7 +118,7 @@ class AuthControllerIntegrationTest {
                 PASSWORD,
                 "Test",
                 "User",
-                "1234567890");
+                "1234567890", null);
 
         ResponseEntity<String> response = restTemplate.postForEntity(baseUrl + "/register", createEntity(request),
                 String.class);

@@ -5,6 +5,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 import com.huseyinsarsilmaz.lms.model.dto.request.BorrowRequest;
+import com.huseyinsarsilmaz.lms.model.dto.response.BorrowingDetailed;
 import com.huseyinsarsilmaz.lms.model.entity.Borrowing;
 import com.huseyinsarsilmaz.lms.model.entity.User;
 
@@ -36,5 +37,7 @@ public interface BorrowingService {
     public Borrowing excuseBorrowing(Borrowing borrowing);
 
     public void checkExcusable(Borrowing borrowing);
+
+    public void printOverdueReport(Page<BorrowingDetailed> page);
 
 }

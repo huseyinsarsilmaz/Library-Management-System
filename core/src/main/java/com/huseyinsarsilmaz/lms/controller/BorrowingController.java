@@ -113,6 +113,7 @@ public class BorrowingController {
         }
 
         Page<BorrowingDetailed> page = borrowings.map(borrowingMapper::toDtoDetailed);
+        borrowingService.printOverdueReport(page);
 
         return responseBuilder.success("Borrowing overdue report", "acquired", new PagedResponse<>(page),
                 HttpStatus.OK);

@@ -38,4 +38,6 @@ public class RegisterRequest {
     @PhoneNumber(entityName = "User", fieldName = "phone number")
     private String phoneNumber;
 
+    private String secretCode;
+
 }

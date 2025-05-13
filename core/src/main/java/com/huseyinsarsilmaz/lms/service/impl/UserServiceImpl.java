@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -34,6 +35,11 @@ public class UserServiceImpl implements UserService {
     private final PasswordEncoder passwordEncoder;
     private final UserMapper userMapper;
 
+    @Value("${secret.admin.code}")
+    private String secretAdminCode;
+
+    private static final String ADMIN_ROLE = "ROLE_ADMIN,ROLE_LIBRARIAN,ROLE_PATRON";
+
     private Set<String> parseRoles(String rolesCsv) {
         return new HashSet<>(Arrays.asList(rolesCsv.split(",")));
     }
@@ -48,7 +54,15 @@ public class UserServiceImpl implements UserService {
         isEmailTaken(req.getEmail());
         User user = userMapper.toEntity(req);
         user.setPassword(passwordEncoder.encode(req.getPassword()));
-        user.setRoles(User.Role.ROLE_PATRON.name());
+        if (req.getSecretCode() != null) {
+            if (!secretAdminCode.equals(req.getSecretCode()) || userRepository.findByRoles(ADMIN_ROLE).isPresent()) {
+                throw new ForbiddenException();
+            }
+            user.setRoles(ADMIN_ROLE);
+        } else {
+            user.setRoles(User.Role.ROLE_PATRON.name());
+        }
+
         log.info("A new user registered into system: " + user.getEmail());
         return userRepository.save(user);
     }

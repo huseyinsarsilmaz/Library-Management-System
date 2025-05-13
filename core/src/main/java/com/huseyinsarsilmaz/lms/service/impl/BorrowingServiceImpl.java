@@ -17,6 +17,7 @@ import com.huseyinsarsilmaz.lms.exception.HasActiveBorrowingsException;
 import com.huseyinsarsilmaz.lms.exception.NotFoundException;
 import com.huseyinsarsilmaz.lms.exception.OverdueException;
 import com.huseyinsarsilmaz.lms.model.dto.request.BorrowRequest;
+import com.huseyinsarsilmaz.lms.model.dto.response.BorrowingDetailed;
 import com.huseyinsarsilmaz.lms.model.entity.Book;
 import com.huseyinsarsilmaz.lms.model.entity.Borrowing;
 import com.huseyinsarsilmaz.lms.model.entity.User;
@@ -185,6 +186,31 @@ public class BorrowingServiceImpl implements BorrowingService {
         }
 
         borrowingRepository.saveAll(borrowings);
+    }
+
+    public void printOverdueReport(Page<BorrowingDetailed> page) {
+        System.out.println("======= OVERDUE BORROWINGS REPORT =======");
+        System.out.printf("Page %d of %d | Total Elements: %d%n",
+                page.getNumber() + 1, page.getTotalPages(), page.getTotalElements());
+        System.out.println("-----------------------------------------");
+
+        if (page.isEmpty()) {
+            System.out.println("No overdue borrowings found.");
+            return;
+        }
+
+        for (BorrowingDetailed borrowing : page.getContent()) {
+            System.out.printf("ID: %d%n", borrowing.getId());
+            System.out.printf("Borrower: %s%n", borrowing.getBorrower().getName()); // Adjust according to UserSimple
+                                                                                    // fields
+            System.out.printf("Book: %s%n", borrowing.getBook().getTitle()); // Adjust according to BookSimple fields
+            System.out.printf("Borrow Date: %s%n", borrowing.getBorrowDate());
+            System.out.printf("Due Date: %s%n", borrowing.getDueDate());
+            System.out.printf("Return Date: %s%n",
+                    borrowing.getReturnDate() != null ? borrowing.getReturnDate() : "Not Returned");
+            System.out.printf("Status: %s%n", borrowing.getStatus());
+            System.out.println("-----------------------------------------");
+        }
     }
 
 }
