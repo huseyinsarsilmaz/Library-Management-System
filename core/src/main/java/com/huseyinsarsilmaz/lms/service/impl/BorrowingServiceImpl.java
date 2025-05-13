@@ -28,8 +28,10 @@ import com.huseyinsarsilmaz.lms.service.UserService;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
+@Slf4j
 @RequiredArgsConstructor
 public class BorrowingServiceImpl implements BorrowingService {
     private final BorrowingRepository borrowingRepository;
@@ -155,7 +157,7 @@ public class BorrowingServiceImpl implements BorrowingService {
         for (Borrowing borrowing : overdueBorrowings) {
             borrowing.setStatus(Borrowing.Status.RETURNED_EXCUSED);
         }
-
+        log.info("The overdue borrowings of user {} is excused", user.getEmail());
         borrowingRepository.saveAll(overdueBorrowings);
     }
 

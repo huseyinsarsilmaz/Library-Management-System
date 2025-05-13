@@ -22,9 +22,11 @@ import com.huseyinsarsilmaz.lms.model.dto.response.ApiResponse;
 import com.huseyinsarsilmaz.lms.util.ResponseBuilder;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @RestControllerAdvice
 @RequiredArgsConstructor
+@Slf4j
 public class GlobalExceptionHandler {
 
     private final ResponseBuilder responseBuilder;
@@ -52,7 +54,6 @@ public class GlobalExceptionHandler {
         return responseBuilder.fail("invalid", new String[] { "State" }, null,
                 HttpStatus.BAD_REQUEST);
     }
-
 
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<ApiResponse<String>> handleHttpMessageNotReadableException(
@@ -124,11 +125,13 @@ public class GlobalExceptionHandler {
                     HttpStatus.NOT_FOUND);
 
         }
+        log.error("A internal server errror has occured: " + ex.getMessage(), ex);
         return responseBuilder.fail("general", new String[] {}, null, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiResponse<String>> handleGeneralException(Exception ex) {
+        log.error("A internal server errror has occured: " + ex.getMessage(), ex);
         return responseBuilder.fail("general", new String[] {}, null, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 }

@@ -24,8 +24,10 @@ import com.huseyinsarsilmaz.lms.service.UserService;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
+@Slf4j
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
@@ -47,7 +49,7 @@ public class UserServiceImpl implements UserService {
         User user = userMapper.toEntity(req);
         user.setPassword(passwordEncoder.encode(req.getPassword()));
         user.setRoles(User.Role.ROLE_PATRON.name());
-
+        log.info("A new user registered into system: " + user.getEmail());
         return userRepository.save(user);
     }
 
@@ -72,6 +74,7 @@ public class UserServiceImpl implements UserService {
         roles.add(newRole.name());
 
         user.setRoles(String.join(",", roles));
+        log.info("User {} is promoted", user.getEmail());
         return userRepository.save(user);
     }
 
