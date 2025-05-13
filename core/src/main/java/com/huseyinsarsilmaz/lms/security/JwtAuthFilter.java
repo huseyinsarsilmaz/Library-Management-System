@@ -16,7 +16,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.huseyinsarsilmaz.lms.model.dto.response.ApiResponse;
+import com.huseyinsarsilmaz.lms.model.dto.response.LmsApiResponse;
 
 import java.io.IOException;
 
@@ -63,7 +63,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     }
 
     private void handleException(HttpServletResponse response, Exception ex) throws IOException {
-        ApiResponse<String> apiResponse = new ApiResponse<>(false, "Unauthorized: " + ex.getMessage(), null);
+        LmsApiResponse<String> apiResponse = new LmsApiResponse<>(false, "Unauthorized: " + ex.getMessage(), null);
 
         response.setStatus(HttpStatus.UNAUTHORIZED.value());
         response.setContentType("application/json");

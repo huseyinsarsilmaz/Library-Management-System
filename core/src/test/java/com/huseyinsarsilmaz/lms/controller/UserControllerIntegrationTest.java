@@ -9,7 +9,7 @@ import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.huseyinsarsilmaz.lms.model.dto.request.PromoteRequest;
 import com.huseyinsarsilmaz.lms.model.dto.request.UserUpdateRequest;
-import com.huseyinsarsilmaz.lms.model.dto.response.ApiResponse;
+import com.huseyinsarsilmaz.lms.model.dto.response.LmsApiResponse;
 import com.huseyinsarsilmaz.lms.model.dto.response.PromoteResponse;
 import com.huseyinsarsilmaz.lms.model.dto.response.UserDetailed;
 import com.huseyinsarsilmaz.lms.model.dto.response.UserSimple;
@@ -96,9 +96,9 @@ class UserControllerIntegrationTest {
                 return request;
         }
 
-        private <T> ApiResponse<T> parseResponse(String json, Class<T> clazz) throws JsonProcessingException {
+        private <T> LmsApiResponse<T> parseResponse(String json, Class<T> clazz) throws JsonProcessingException {
                 JavaType type = objectMapper.getTypeFactory()
-                                .constructParametricType(ApiResponse.class, clazz);
+                                .constructParametricType(LmsApiResponse.class, clazz);
                 return objectMapper.readValue(json, type);
         }
 
@@ -204,7 +204,7 @@ class UserControllerIntegrationTest {
 
                 assertEquals(HttpStatus.OK, response.getStatusCode());
 
-                ApiResponse<PromoteResponse> apiResponse = parseResponse(response.getBody(), PromoteResponse.class);
+                LmsApiResponse<PromoteResponse> apiResponse = parseResponse(response.getBody(), PromoteResponse.class);
 
                 assertEquals(patronUser.getEmail(), apiResponse.getData().getEmail());
         }
@@ -224,7 +224,7 @@ class UserControllerIntegrationTest {
 
                 assertEquals(HttpStatus.OK, response.getStatusCode());
 
-                ApiResponse<UserSimple> apiResponse = parseResponse(response.getBody(), UserSimple.class);
+                LmsApiResponse<UserSimple> apiResponse = parseResponse(response.getBody(), UserSimple.class);
 
                 assertEquals(patronUser.getEmail(), apiResponse.getData().getEmail());
         }
@@ -246,7 +246,7 @@ class UserControllerIntegrationTest {
 
                 assertEquals(HttpStatus.OK, response.getStatusCode());
 
-                ApiResponse<UserSimple> apiResponse = parseResponse(response.getBody(), UserSimple.class);
+                LmsApiResponse<UserSimple> apiResponse = parseResponse(response.getBody(), UserSimple.class);
 
                 assertEquals("Updated", apiResponse.getData().getName());
         }
@@ -268,7 +268,7 @@ class UserControllerIntegrationTest {
 
                 assertEquals(HttpStatus.OK, response.getStatusCode());
 
-                ApiResponse<UserSimple> apiResponse = parseResponse(response.getBody(), UserSimple.class);
+                LmsApiResponse<UserSimple> apiResponse = parseResponse(response.getBody(), UserSimple.class);
 
                 assertEquals(patronUser.getEmail(), apiResponse.getData().getEmail());
 
@@ -337,7 +337,7 @@ class UserControllerIntegrationTest {
 
                 assertEquals(HttpStatus.OK, response.getStatusCode());
 
-                ApiResponse<UserSimple> apiResponse = parseResponse(response.getBody(), UserSimple.class);
+                LmsApiResponse<UserSimple> apiResponse = parseResponse(response.getBody(), UserSimple.class);
 
                 assertEquals("Updated", apiResponse.getData().getName());
         }
@@ -366,7 +366,7 @@ class UserControllerIntegrationTest {
                 ResponseEntity<String> response = sendRequest("/" + patronUser.getId(), HttpMethod.DELETE, entity);
                 assertEquals(HttpStatus.OK, response.getStatusCode());
 
-                ApiResponse<UserSimple> apiResponse = parseResponse(response.getBody(), UserSimple.class);
+                LmsApiResponse<UserSimple> apiResponse = parseResponse(response.getBody(), UserSimple.class);
 
                 User deleted = userRepository.findById(apiResponse.getData().getId()).orElse(null);
                 assertNull(deleted);
@@ -378,7 +378,7 @@ class UserControllerIntegrationTest {
                 ResponseEntity<String> response = sendRequest("/" + librarianUser.getId(), HttpMethod.DELETE, entity);
                 assertEquals(HttpStatus.OK, response.getStatusCode());
 
-                ApiResponse<UserSimple> apiResponse = parseResponse(response.getBody(), UserSimple.class);
+                LmsApiResponse<UserSimple> apiResponse = parseResponse(response.getBody(), UserSimple.class);
 
                 User deleted = userRepository.findById(apiResponse.getData().getId()).orElse(null);
                 assertNull(deleted);
@@ -440,7 +440,7 @@ class UserControllerIntegrationTest {
 
                 assertEquals(HttpStatus.OK, response.getStatusCode());
 
-                ApiResponse<UserDetailed> apiResponse = parseResponse(response.getBody(), UserDetailed.class);
+                LmsApiResponse<UserDetailed> apiResponse = parseResponse(response.getBody(), UserDetailed.class);
 
                 assertEquals(deactivatedUser.getEmail(), apiResponse.getData().getEmail());
                 assertTrue(apiResponse.getData().getIsActive());

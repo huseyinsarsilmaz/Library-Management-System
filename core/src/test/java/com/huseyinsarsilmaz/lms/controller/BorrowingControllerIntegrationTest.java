@@ -6,7 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.huseyinsarsilmaz.lms.model.dto.request.BorrowRequest;
-import com.huseyinsarsilmaz.lms.model.dto.response.ApiResponse;
+import com.huseyinsarsilmaz.lms.model.dto.response.LmsApiResponse;
 import com.huseyinsarsilmaz.lms.model.dto.response.BorrowingDetailed;
 import com.huseyinsarsilmaz.lms.model.dto.response.BorrowingSimple;
 import com.huseyinsarsilmaz.lms.model.dto.response.PagedResponse;
@@ -173,7 +173,8 @@ class BorrowingControllerIntegrationTest {
                 ResponseEntity<String> response = sendRequest("/my", HttpMethod.GET, entity);
                 assertEquals(HttpStatus.OK, response.getStatusCode());
 
-                ApiResponse<PagedResponse<BorrowingDetailed>> apiResponse = objectMapper.readValue(response.getBody(),
+                LmsApiResponse<PagedResponse<BorrowingDetailed>> apiResponse = objectMapper.readValue(
+                                response.getBody(),
                                 new TypeReference<>() {
                                 });
 
@@ -214,9 +215,9 @@ class BorrowingControllerIntegrationTest {
 
                 assertEquals(HttpStatus.OK, response.getStatusCode());
 
-                ApiResponse<PagedResponse<BorrowingDetailed>> apiResponse = objectMapper.readValue(
+                LmsApiResponse<PagedResponse<BorrowingDetailed>> apiResponse = objectMapper.readValue(
                                 response.getBody(),
-                                new TypeReference<ApiResponse<PagedResponse<BorrowingDetailed>>>() {
+                                new TypeReference<LmsApiResponse<PagedResponse<BorrowingDetailed>>>() {
                                 });
 
                 assertNotNull(apiResponse.getData());
@@ -262,7 +263,8 @@ class BorrowingControllerIntegrationTest {
 
                 assertEquals(HttpStatus.OK, response.getStatusCode());
 
-                ApiResponse<PagedResponse<BorrowingDetailed>> apiResponse = objectMapper.readValue(response.getBody(),
+                LmsApiResponse<PagedResponse<BorrowingDetailed>> apiResponse = objectMapper.readValue(
+                                response.getBody(),
                                 new TypeReference<>() {
                                 });
 
@@ -301,7 +303,8 @@ class BorrowingControllerIntegrationTest {
 
                 assertEquals(HttpStatus.OK, response.getStatusCode());
 
-                ApiResponse<PagedResponse<BorrowingDetailed>> apiResponse = objectMapper.readValue(response.getBody(),
+                LmsApiResponse<PagedResponse<BorrowingDetailed>> apiResponse = objectMapper.readValue(
+                                response.getBody(),
                                 new TypeReference<>() {
                                 });
 
@@ -405,7 +408,7 @@ class BorrowingControllerIntegrationTest {
 
                 assertEquals(HttpStatus.CREATED, response.getStatusCode());
 
-                ApiResponse<BorrowingSimple> apiResponse = objectMapper.readValue(
+                LmsApiResponse<BorrowingSimple> apiResponse = objectMapper.readValue(
                                 response.getBody(),
                                 new TypeReference<>() {
                                 });
@@ -432,7 +435,7 @@ class BorrowingControllerIntegrationTest {
 
                 assertEquals(HttpStatus.CREATED, response.getStatusCode());
 
-                ApiResponse<BorrowingSimple> apiResponse = objectMapper.readValue(
+                LmsApiResponse<BorrowingSimple> apiResponse = objectMapper.readValue(
                                 response.getBody(),
                                 new TypeReference<>() {
                                 });
@@ -496,7 +499,7 @@ class BorrowingControllerIntegrationTest {
 
                 assertEquals(HttpStatus.OK, response.getStatusCode());
 
-                ApiResponse<BorrowingDetailed> apiResponse = objectMapper.readValue(response.getBody(),
+                LmsApiResponse<BorrowingDetailed> apiResponse = objectMapper.readValue(response.getBody(),
                                 new TypeReference<>() {
                                 });
 
@@ -557,7 +560,7 @@ class BorrowingControllerIntegrationTest {
 
                 assertEquals(HttpStatus.OK, response.getStatusCode());
 
-                ApiResponse<BorrowingDetailed> apiResponse = objectMapper.readValue(response.getBody(),
+                LmsApiResponse<BorrowingDetailed> apiResponse = objectMapper.readValue(response.getBody(),
                                 new TypeReference<>() {
                                 });
 

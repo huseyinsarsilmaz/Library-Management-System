@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.huseyinsarsilmaz.lms.model.dto.request.PasswordUpdateRequest;
 import com.huseyinsarsilmaz.lms.model.dto.request.PromoteRequest;
 import com.huseyinsarsilmaz.lms.model.dto.request.UserUpdateRequest;
-import com.huseyinsarsilmaz.lms.model.dto.response.ApiResponse;
+import com.huseyinsarsilmaz.lms.model.dto.response.LmsApiResponse;
 import com.huseyinsarsilmaz.lms.model.dto.response.PromoteResponse;
 import com.huseyinsarsilmaz.lms.model.dto.response.UserDetailed;
 import com.huseyinsarsilmaz.lms.model.dto.response.UserSimple;
@@ -58,7 +58,7 @@ public class UserController {
 
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @PostMapping("/promote")
-    public ResponseEntity<ApiResponse<PromoteResponse>> promote(@Valid @RequestBody PromoteRequest req) {
+    public ResponseEntity<LmsApiResponse<PromoteResponse>> promote(@Valid @RequestBody PromoteRequest req) {
         User promotedUser = userService.getByEmail(req.getEmail());
         promotedUser = userService.promote(promotedUser, req.getNewRole());
 
@@ -66,13 +66,13 @@ public class UserController {
     }
 
     @GetMapping("/me")
-    public ResponseEntity<ApiResponse<UserSimple>> getMyUser(@CurrentUser User myUser) {
+    public ResponseEntity<LmsApiResponse<UserSimple>> getMyUser(@CurrentUser User myUser) {
 
         return responseBuilder.success("User", "fetched", userMapper.toDtoSimple(myUser), HttpStatus.OK);
     }
 
     @PutMapping("/me")
-    public ResponseEntity<ApiResponse<UserSimple>> updateMyUser(@CurrentUser User myUser,
+    public ResponseEntity<LmsApiResponse<UserSimple>> updateMyUser(@CurrentUser User myUser,
             @Valid @RequestBody UserUpdateRequest req) {
         if (!myUser.getEmail().equals(req.getEmail())) {
             userService.isEmailTaken(req.getEmail());
@@ -84,7 +84,7 @@ public class UserController {
     }
 
     @PutMapping("/me/password")
-    public ResponseEntity<ApiResponse<UserSimple>> updateMyPassword(@CurrentUser User myUser,
+    public ResponseEntity<LmsApiResponse<UserSimple>> updateMyPassword(@CurrentUser User myUser,
             @Valid @RequestBody PasswordUpdateRequest req) {
 
         myUser = userService.updatePassword(myUser, req);
@@ -93,14 +93,14 @@ public class UserController {
     }
 
     @DeleteMapping("/me")
-    public ResponseEntity<ApiResponse<UserSimple>> deleteMyUser(@CurrentUser User myUser) {
+    public ResponseEntity<LmsApiResponse<UserSimple>> deleteMyUser(@CurrentUser User myUser) {
         userService.delete(myUser);
 
         return responseBuilder.success("User", "deleted", userMapper.toDtoSimple(myUser), HttpStatus.OK);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ApiResponse<UserSimple>> getUser(
+    public ResponseEntity<LmsApiResponse<UserSimple>> getUser(
             @CurrentUser User myUser,
             @PathVariable("id") long id) {
         User targetUser = authorizeAccessToUser(myUser, id, false);
@@ -109,7 +109,7 @@ public class UserController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<ApiResponse<UserSimple>> updateUser(
+    public ResponseEntity<LmsApiResponse<UserSimple>> updateUser(
             @CurrentUser User myUser,
             @Valid @RequestBody UserUpdateRequest req, @PathVariable("id") long id) {
         User targetUser = authorizeAccessToUser(myUser, id, true);
@@ -124,7 +124,7 @@ public class UserController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<ApiResponse<UserSimple>> deleteUser(
+    public ResponseEntity<LmsApiResponse<UserSimple>> deleteUser(
             @CurrentUser User myUser,
             @PathVariable("id") long id) {
         User targetUser = authorizeAccessToUser(myUser, id, true);
@@ -135,7 +135,7 @@ public class UserController {
 
     @PreAuthorize("hasRole('ROLE_LIBRARIAN')")
     @PostMapping("/{id}/reactivate")
-    public ResponseEntity<ApiResponse<UserDetailed>> reactivateUser(@CurrentUser User myUser,
+    public ResponseEntity<LmsApiResponse<UserDetailed>> reactivateUser(@CurrentUser User myUser,
             @PathVariable("id") long id) {
         User reactivatedUser = userService.getById(id);
         userService.checkDeactivated(reactivatedUser);

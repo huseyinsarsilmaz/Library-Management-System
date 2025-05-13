@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.huseyinsarsilmaz.lms.model.dto.request.BorrowRequest;
-import com.huseyinsarsilmaz.lms.model.dto.response.ApiResponse;
+import com.huseyinsarsilmaz.lms.model.dto.response.LmsApiResponse;
 import com.huseyinsarsilmaz.lms.model.dto.response.BorrowingDetailed;
 import com.huseyinsarsilmaz.lms.model.dto.response.BorrowingSimple;
 import com.huseyinsarsilmaz.lms.model.dto.response.PagedResponse;
@@ -40,7 +40,7 @@ public class BorrowingController {
     private final BorrowingMapper borrowingMapper;
 
     @PostMapping
-    public ResponseEntity<ApiResponse<BorrowingSimple>> createBorrowing(
+    public ResponseEntity<LmsApiResponse<BorrowingSimple>> createBorrowing(
             @CurrentUser User myUser,
             @Valid @RequestBody BorrowRequest req) {
 
@@ -59,7 +59,7 @@ public class BorrowingController {
     }
 
     @PostMapping("/{id}/return")
-    public ResponseEntity<ApiResponse<BorrowingDetailed>> returnBorrowing(
+    public ResponseEntity<LmsApiResponse<BorrowingDetailed>> returnBorrowing(
             @CurrentUser User myUser,
             @PathVariable("id") long id) {
 
@@ -75,7 +75,7 @@ public class BorrowingController {
     }
 
     @GetMapping("/my")
-    public ResponseEntity<ApiResponse<PagedResponse<BorrowingSimple>>> getMyBorrowingHistory(
+    public ResponseEntity<LmsApiResponse<PagedResponse<BorrowingSimple>>> getMyBorrowingHistory(
             @CurrentUser User myUser,
             @PageableDefault(size = 10, sort = "borrower") Pageable pageable) {
 
@@ -87,7 +87,7 @@ public class BorrowingController {
 
     @PreAuthorize("hasRole('ROLE_LIBRARIAN')")
     @GetMapping("/user/{id}")
-    public ResponseEntity<ApiResponse<PagedResponse<BorrowingDetailed>>> getBorrowingHistory(
+    public ResponseEntity<LmsApiResponse<PagedResponse<BorrowingDetailed>>> getBorrowingHistory(
             @PathVariable("id") long id,
             @PageableDefault(size = 10, sort = "borrower") Pageable pageable) {
 
@@ -100,7 +100,7 @@ public class BorrowingController {
 
     @PreAuthorize("hasRole('ROLE_LIBRARIAN')")
     @GetMapping("/report")
-    public ResponseEntity<ApiResponse<PagedResponse<BorrowingDetailed>>> getBorrowingReport(
+    public ResponseEntity<LmsApiResponse<PagedResponse<BorrowingDetailed>>> getBorrowingReport(
             @RequestParam(required = false) Long borrowerId,
             @PageableDefault(size = 10, sort = "borrower") Pageable pageable) {
 
@@ -121,7 +121,7 @@ public class BorrowingController {
 
     @PreAuthorize("hasRole('ROLE_LIBRARIAN')")
     @PostMapping("/{id}/excuse")
-    public ResponseEntity<ApiResponse<BorrowingDetailed>> excuseBorrowing(@PathVariable("id") long id) {
+    public ResponseEntity<LmsApiResponse<BorrowingDetailed>> excuseBorrowing(@PathVariable("id") long id) {
 
         Borrowing borrowing = borrowingService.getById(id);
         borrowingService.checkExcusable(borrowing);

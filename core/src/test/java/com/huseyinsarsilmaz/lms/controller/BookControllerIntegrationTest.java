@@ -11,7 +11,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import com.huseyinsarsilmaz.lms.model.dto.request.BookCreateRequest;
 import com.huseyinsarsilmaz.lms.model.dto.request.BookUpdateRequest;
-import com.huseyinsarsilmaz.lms.model.dto.response.ApiResponse;
+import com.huseyinsarsilmaz.lms.model.dto.response.LmsApiResponse;
 import com.huseyinsarsilmaz.lms.model.dto.response.BookSimple;
 
 import com.huseyinsarsilmaz.lms.model.entity.Book;
@@ -155,7 +155,8 @@ class BookControllerIntegrationTest {
                 ResponseEntity<String> response = sendRequest("/" + savedBook.getId(), HttpMethod.GET, entity);
 
                 assertEquals(HttpStatus.OK, response.getStatusCode());
-                ApiResponse<BookSimple> apiResponse = objectMapper.readValue(response.getBody(), new TypeReference<>() {
+                LmsApiResponse<BookSimple> apiResponse = objectMapper.readValue(response.getBody(),
+                                new TypeReference<>() {
                 });
 
                 assertEquals(savedBook.getTitle(), apiResponse.getData().getTitle());
@@ -204,7 +205,8 @@ class BookControllerIntegrationTest {
 
                 assertEquals(HttpStatus.CREATED, response.getStatusCode());
 
-                ApiResponse<BookSimple> apiResponse = objectMapper.readValue(response.getBody(), new TypeReference<>() {
+                LmsApiResponse<BookSimple> apiResponse = objectMapper.readValue(response.getBody(),
+                                new TypeReference<>() {
                 });
 
                 assertEquals(req.getTitle(), apiResponse.getData().getTitle());
@@ -264,7 +266,8 @@ class BookControllerIntegrationTest {
 
                 assertEquals(HttpStatus.OK, response.getStatusCode());
 
-                ApiResponse<BookSimple> apiResponse = objectMapper.readValue(response.getBody(), new TypeReference<>() {
+                LmsApiResponse<BookSimple> apiResponse = objectMapper.readValue(response.getBody(),
+                                new TypeReference<>() {
                 });
 
                 assertEquals(req.getTitle(), apiResponse.getData().getTitle());

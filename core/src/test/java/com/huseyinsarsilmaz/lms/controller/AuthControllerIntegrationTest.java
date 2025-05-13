@@ -10,7 +10,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import com.huseyinsarsilmaz.lms.model.dto.request.LoginRequest;
 import com.huseyinsarsilmaz.lms.model.dto.request.RegisterRequest;
-import com.huseyinsarsilmaz.lms.model.dto.response.ApiResponse;
+import com.huseyinsarsilmaz.lms.model.dto.response.LmsApiResponse;
 import com.huseyinsarsilmaz.lms.model.dto.response.LoginResponse;
 import com.huseyinsarsilmaz.lms.model.dto.response.RegisterResponse;
 import com.huseyinsarsilmaz.lms.model.entity.User;
@@ -106,7 +106,8 @@ class AuthControllerIntegrationTest {
                 String.class);
 
         assertEquals(HttpStatus.CREATED, response.getStatusCode());
-        ApiResponse<RegisterResponse> apiResponse = objectMapper.readValue(response.getBody(), new TypeReference<>() {
+        LmsApiResponse<RegisterResponse> apiResponse = objectMapper.readValue(response.getBody(),
+                new TypeReference<>() {
         });
         assertEquals(REGISTER_EMAIL, apiResponse.getData().getEmail());
     }
@@ -134,7 +135,7 @@ class AuthControllerIntegrationTest {
                 String.class);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
-        ApiResponse<LoginResponse> apiResponse = objectMapper.readValue(response.getBody(), new TypeReference<>() {
+        LmsApiResponse<LoginResponse> apiResponse = objectMapper.readValue(response.getBody(), new TypeReference<>() {
         });
         assertNotNull(apiResponse.getData().getToken());
     }

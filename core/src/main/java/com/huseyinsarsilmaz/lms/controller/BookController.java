@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.huseyinsarsilmaz.lms.model.dto.request.BookCreateRequest;
 import com.huseyinsarsilmaz.lms.model.dto.request.BookUpdateRequest;
-import com.huseyinsarsilmaz.lms.model.dto.response.ApiResponse;
+import com.huseyinsarsilmaz.lms.model.dto.response.LmsApiResponse;
 import com.huseyinsarsilmaz.lms.model.dto.response.BookSimple;
 import com.huseyinsarsilmaz.lms.model.dto.response.PagedResponse;
 import com.huseyinsarsilmaz.lms.model.entity.Book;
@@ -40,21 +40,21 @@ public class BookController {
 
     @PreAuthorize("hasRole('ROLE_LIBRARIAN')")
     @PostMapping
-    public ResponseEntity<ApiResponse<BookSimple>> create(@Valid @RequestBody BookCreateRequest req) {
+    public ResponseEntity<LmsApiResponse<BookSimple>> create(@Valid @RequestBody BookCreateRequest req) {
 
         Book newBook = bookService.create(req);
         return responseBuilder.success("Book", "created", bookMapper.toDtoSimple(newBook), HttpStatus.CREATED);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ApiResponse<BookSimple>> getById(@PathVariable long id) {
+    public ResponseEntity<LmsApiResponse<BookSimple>> getById(@PathVariable long id) {
         Book book = bookService.getById(id);
         return responseBuilder.success("Book", "fetched", bookMapper.toDtoSimple(book), HttpStatus.OK);
     }
 
     @PreAuthorize("hasRole('ROLE_LIBRARIAN')")
     @PutMapping("/{id}")
-    public ResponseEntity<ApiResponse<BookSimple>> update(
+    public ResponseEntity<LmsApiResponse<BookSimple>> update(
             @Valid @RequestBody BookUpdateRequest req,
             @PathVariable long id) {
 
@@ -70,7 +70,7 @@ public class BookController {
 
     @PreAuthorize("hasRole('ROLE_LIBRARIAN')")
     @DeleteMapping("/{id}")
-    public ResponseEntity<ApiResponse<BookSimple>> delete(@PathVariable long id) {
+    public ResponseEntity<LmsApiResponse<BookSimple>> delete(@PathVariable long id) {
 
         Book book = bookService.getById(id);
         bookService.delete(book);
@@ -79,7 +79,7 @@ public class BookController {
     }
 
     @GetMapping("/search")
-    public ResponseEntity<ApiResponse<PagedResponse<BookSimple>>> search(
+    public ResponseEntity<LmsApiResponse<PagedResponse<BookSimple>>> search(
             @RequestParam Book.SearchType type,
             @RequestParam String query,
             @PageableDefault(size = 10, sort = "title") Pageable pageable) {

@@ -7,7 +7,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 
-import com.huseyinsarsilmaz.lms.model.dto.response.ApiResponse;
+import com.huseyinsarsilmaz.lms.model.dto.response.LmsApiResponse;
 
 import lombok.RequiredArgsConstructor;
 
@@ -16,18 +16,18 @@ import lombok.RequiredArgsConstructor;
 public class LmsResponseBuilder {
     private final MessageSource messageSource;
 
-    public <T> ResponseEntity<ApiResponse<T>> success(String entity, String action, T data,
+    public <T> ResponseEntity<LmsApiResponse<T>> success(String entity, String action, T data,
             HttpStatus status) {
         String message = messageSource.getMessage("success.message", new Object[] { entity, action },
                 Locale.getDefault());
-        ApiResponse<T> response = new ApiResponse<>(true, message, data);
+        LmsApiResponse<T> response = new LmsApiResponse<>(true, message, data);
         return new ResponseEntity<>(response, status);
     }
 
-    public <T> ResponseEntity<ApiResponse<T>> fail(String type, String[] args, T data,
+    public <T> ResponseEntity<LmsApiResponse<T>> fail(String type, String[] args, T data,
             HttpStatus status) {
         String message = messageSource.getMessage("fail." + type, args, Locale.getDefault());
-        ApiResponse<T> response = new ApiResponse<>(false, message, data);
+        LmsApiResponse<T> response = new LmsApiResponse<>(false, message, data);
         return new ResponseEntity<>(response, status);
     }
 

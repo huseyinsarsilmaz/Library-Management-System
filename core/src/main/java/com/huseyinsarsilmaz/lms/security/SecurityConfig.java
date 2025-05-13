@@ -15,7 +15,7 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.huseyinsarsilmaz.lms.model.dto.response.ApiResponse;
+import com.huseyinsarsilmaz.lms.model.dto.response.LmsApiResponse;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -36,7 +36,7 @@ public class SecurityConfig {
 
     private void handleExceptionInFilterChain(HttpServletRequest request, HttpServletResponse response,
             RuntimeException exception, int responseCode) throws IOException {
-            ApiResponse<String> apiResponse = new ApiResponse<>(false,
+            LmsApiResponse<String> apiResponse = new LmsApiResponse<>(false,
                 "Unauthorized: " + exception.getMessage(), null);
         response.setStatus(responseCode);
         response.setContentType("application/json");

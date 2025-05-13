@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.huseyinsarsilmaz.lms.model.dto.request.LoginRequest;
 import com.huseyinsarsilmaz.lms.model.dto.request.RegisterRequest;
-import com.huseyinsarsilmaz.lms.model.dto.response.ApiResponse;
+import com.huseyinsarsilmaz.lms.model.dto.response.LmsApiResponse;
 import com.huseyinsarsilmaz.lms.model.dto.response.LoginResponse;
 import com.huseyinsarsilmaz.lms.model.dto.response.RegisterResponse;
 import com.huseyinsarsilmaz.lms.model.entity.User;
@@ -30,7 +30,8 @@ public class AuthController {
     private final LmsResponseBuilder responseBuilder;
 
     @PostMapping("/register")
-    public ResponseEntity<ApiResponse<RegisterResponse>> register(@Valid @RequestBody RegisterRequest request) {
+
+    public ResponseEntity<LmsApiResponse<RegisterResponse>> register(@Valid @RequestBody RegisterRequest request) {
 
         User registeredUser = userService.register(request);
         RegisterResponse response = new RegisterResponse(registeredUser);
@@ -39,7 +40,7 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<ApiResponse<LoginResponse>> login(@Valid @RequestBody LoginRequest request) {
+    public ResponseEntity<LmsApiResponse<LoginResponse>> login(@Valid @RequestBody LoginRequest request) {
         String jwtToken = authService.authenticateAndGenerateToken(request);
         LoginResponse response = new LoginResponse(jwtToken);
 
