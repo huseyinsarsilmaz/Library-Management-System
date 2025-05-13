@@ -38,3 +38,6 @@ mvnw*
 
 #Sensitive data
 application-local.properties
+
+#Logging
+application.log
