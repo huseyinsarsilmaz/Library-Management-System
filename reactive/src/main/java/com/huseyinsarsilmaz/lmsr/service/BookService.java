@@ -19,4 +19,11 @@ public class BookService {
     public Mono<Book> getBookById(Long id) {
         return bookRepository.findById(id);
     }
+
+    public Mono<Void> updateAvailability(Mono<Book> bookMono, boolean available) {
+        return bookMono.flatMap(book -> {
+            book.setIsAvailable(available);
+            return bookRepository.save(book).then();
+        });
+    }
 }

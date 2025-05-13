@@ -2,7 +2,7 @@ package com.huseyinsarsilmaz.lmsr.security;
 
 import org.springframework.lang.NonNull;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.context.ReactiveSecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebFilter;
@@ -27,18 +27,20 @@ public class JwtAuthenticationFilter implements WebFilter {
             String username = jwtService.extractEmail(token);
 
             if (username != null) {
-                // Wrap the boolean value into Mono
-                return Mono.just(jwtService.validateToken(token, username))
-                        .flatMap(valid -> {
-                            if (valid) {
-                                // If token is valid, set the authentication in SecurityContext
-                                SecurityContextHolder.getContext().setAuthentication(
-                                        new UsernamePasswordAuthenticationToken(username, null, null));
-                            }
-                            return chain.filter(exchange);
-                        });
-            }
+            return Mono.just(jwtService.validateToken(token, username))
+                    .flatMap(valid -> {
+                        if (valid) {
+                            UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
+                                    username, null, null);
+                            return chain.filter(exchange)
+                                    .contextWrite(
+                                            ReactiveSecurityContextHolder.withAuthentication(authenticationToken));
+                        }
+                        return chain.filter(exchange);
+                    });
         }
-        return chain.filter(exchange);
     }
+    return chain.filter(exchange);
+}
+
 }

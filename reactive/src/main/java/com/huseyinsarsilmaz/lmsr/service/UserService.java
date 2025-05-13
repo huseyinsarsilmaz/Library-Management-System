@@ -19,4 +19,15 @@ public class UserService {
     public Mono<User> getUserByEmail(String email) {
         return userRepository.findByEmail(email);
     }
+
+    public Mono<User> getUserById(Long id) {
+        return userRepository.findById(id);
+    }
+
+    public Mono<User> changeActive(Mono<User> userMono, boolean active) {
+        return userMono.flatMap(user -> {
+            user.setIsActive(active);
+            return userRepository.save(user);
+        });
+    }
 }

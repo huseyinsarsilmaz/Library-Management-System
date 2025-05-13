@@ -25,7 +25,9 @@ public class Borrowing {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
+    @Column("borrower_id")
     private Long borrowerId;
+    @Column("book_id")
     private Long bookId;
 
     private LocalDate borrowDate;
