@@ -1,0 +1,4 @@
+spring.r2dbc.username=huseyin
+spring.r2dbc.password=12345678
+
+jwt.secret=5e1b2f2f99bdb5b33f7926e69c9f250c232e10d80fe3e07397edb2f8a2c23ae2
