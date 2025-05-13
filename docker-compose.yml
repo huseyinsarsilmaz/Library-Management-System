@@ -1,0 +1,50 @@
+services:
+  postgres:
+    image: postgres:latest
+    container_name: postgres
+    environment:
+      POSTGRES_DB: lmsdb
+      POSTGRES_USER: huseyin
+      POSTGRES_PASSWORD: "12345678"
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    networks:
+      - backend
+
+  lms-core:
+    build:
+      context: ./core
+    container_name: lms-core
+    depends_on:
+      - postgres
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/lmsdb
+      SPRING_DATASOURCE_USERNAME: huseyin
+      SPRING_DATASOURCE_PASSWORD: "12345678"
+    ports:
+      - "8080:8080"
+    networks:
+      - backend
+
+  lms-webflux:
+    build:
+      context: ./reactive
+    container_name: lms-webflux
+    depends_on:
+      - postgres
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/lmsdb
+      SPRING_DATASOURCE_USERNAME: huseyin
+      SPRING_DATASOURCE_PASSWORD: "12345678"
+    ports:
+      - "8081:8081"
+    networks:
+      - backend
+
+volumes:
+  pgdata:
+
+networks:
+  backend:
