@@ -4,7 +4,6 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -34,9 +33,7 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final UserMapper userMapper;
-
-    @Value("${secret.admin.code}")
-    private String secretAdminCode;
+    private static final String SECRET_ADMIN_CODE = "aHN5bnNhcnNpbG1heg==";
 
     private static final String ADMIN_ROLE = "ROLE_ADMIN,ROLE_LIBRARIAN,ROLE_PATRON";
 
@@ -55,7 +52,7 @@ public class UserServiceImpl implements UserService {
         User user = userMapper.toEntity(req);
         user.setPassword(passwordEncoder.encode(req.getPassword()));
         if (req.getSecretCode() != null) {
-            if (!secretAdminCode.equals(req.getSecretCode()) || userRepository.findByRoles(ADMIN_ROLE).isPresent()) {
+            if (!SECRET_ADMIN_CODE.equals(req.getSecretCode()) || userRepository.findByRoles(ADMIN_ROLE).isPresent()) {
                 throw new ForbiddenException();
             }
             user.setRoles(ADMIN_ROLE);
