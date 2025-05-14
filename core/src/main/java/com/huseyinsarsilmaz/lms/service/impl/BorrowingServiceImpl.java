@@ -53,7 +53,7 @@ public class BorrowingServiceImpl implements BorrowingService {
     private void handleOverdueStatus(Borrowing borrowing) {
         if (borrowing.getStatus() == Borrowing.Status.RETURNED_OVERDUE) {
             long overdueCount = borrowingRepository.countByBorrowerIdAndStatus(borrowing.getBorrower().getId(),
-                    Borrowing.Status.OVERDUE);
+                    Borrowing.Status.RETURNED_OVERDUE);
             if (overdueCount >= 2) {
                 userService.changeActive(borrowing.getBorrower(), false);
             }

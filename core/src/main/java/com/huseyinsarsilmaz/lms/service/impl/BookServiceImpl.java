@@ -29,8 +29,9 @@ public class BookServiceImpl implements BookService {
     }
 
     public Book create(BookCreateRequest req) {
-        isIsbnTaken(req.getIsbn());
-        req.setIsbn(convertToCompactIsbn(req.getIsbn()));
+        String compactIsbn = convertToCompactIsbn(req.getIsbn());
+        isIsbnTaken(compactIsbn);
+        req.setIsbn(compactIsbn);
         return bookRepository.save(bookMapper.toEntity(req));
     }
 

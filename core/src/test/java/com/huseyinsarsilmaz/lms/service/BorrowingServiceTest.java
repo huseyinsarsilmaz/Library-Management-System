@@ -171,7 +171,8 @@ public class BorrowingServiceTest {
 
     @Test
     void testReturnBorrowing_whenOverdueAndNotSuspended() {
-        when(borrowingRepository.countByBorrowerIdAndStatus(user.getId(), Borrowing.Status.OVERDUE)).thenReturn(1L);
+        when(borrowingRepository.countByBorrowerIdAndStatus(user.getId(), Borrowing.Status.RETURNED_OVERDUE))
+                .thenReturn(1L);
         when(bookService.updateAvailability(book, true)).thenReturn(book);
         when(borrowingRepository.save(borrowing)).thenReturn(borrowing);
 
@@ -185,7 +186,8 @@ public class BorrowingServiceTest {
     void testReturnBorrowing_whenOverdueAndSuspended() {
         book.setIsAvailable(false);
 
-        when(borrowingRepository.countByBorrowerIdAndStatus(user.getId(), Borrowing.Status.OVERDUE)).thenReturn(2L);
+        when(borrowingRepository.countByBorrowerIdAndStatus(user.getId(), Borrowing.Status.RETURNED_OVERDUE))
+                .thenReturn(2L);
         when(bookService.updateAvailability(book, true)).thenAnswer(inv -> {
             book.setIsAvailable(true);
             return book;
