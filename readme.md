@@ -127,8 +127,8 @@ To avoid exposing sensitive information, this project uses `application-local.pr
 - You must rename these files by removing the `.template` extension using the following commands:
 
 ```bash
-mv lms-core/src/main/resources/application-local.properties.template lms-core/src/main/resources/application-local.properties
-mv lms-webflux/src/main/resources/application-local.properties.template lms-webflux/src/main/resources/application-local.properties
+mv core/src/main/resources/application-local.properties.template core/src/main/resources/application-local.properties
+mv reactive/src/main/resources/application-local.properties.template reactive/src/main/resources/application-local.properties
 ```
 
 > **Note:**
@@ -188,12 +188,12 @@ If Docker is not used, follow these steps manually:
 
 ```bash
 # Core service
-cd lms-core/target
+cd core/target
 java -jar lms-core-0.0.1-SNAPSHOT.jar
 
 # WebFlux service
-cd ../../lms-webflux/target
-java -jar lms-webflux-0.0.1-SNAPSHOT.jar
+cd ../../reactive/target
+java -jar lmsr-0.0.1-SNAPSHOT.jar
 ```
 
 ### 💡 Extra: Run via IDE
