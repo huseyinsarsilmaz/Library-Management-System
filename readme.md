@@ -138,22 +138,27 @@ mv lms-webflux/src/main/resources/application-local.properties.template lms-webf
 
 ### 🔨 2. Build the Projects with Maven
 
-If you're not running the project from an IDE, you need to build both modules using Maven:
+If you're not running the project from an IDE, you need to build both modules using Maven.
 
-```bash
-mvn clean package
-```
+> ⚠️ This project includes integration tests that require a running PostgreSQL database.  
+> To avoid test failures during the build (especially before the database is available), it's **recommended to skip tests** during this step and run them manually later **after** the database is up.
 
-To skip tests during the build:
+#### ✅ Recommended: Skip Tests During Initial Build
 
 ```bash
 mvn clean package -DskipTests
 ```
 
+#### ▶️ Full Build (tests will run, requires active DB connection)
+
+```bash
+mvn clean package
+```
+
 > On Windows, you can use the Spring Boot wrapper:
 >
 > ```bash
-> .\mvnw clean package
+> .\mvnw clean package -DskipTests
 > ```
 
 ### 🐳 3. Run with Docker (Preferred)
